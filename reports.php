@@ -72,7 +72,7 @@ if ($download == 'csv') {
         $row = array($user->firstname, $user->lastname, $user->email);
         
         $totalpresent = 0;
-        $totalabsent = 0;
+        $totalexcused = 0;
         
         foreach ($meetings as $meeting) {
             $attendance = $DB->get_record('qratt_attendance', 
@@ -90,19 +90,22 @@ if ($download == 'csv') {
                         break;
                     case QRATT_STATUS_EXCUSED:
                         $row[] = get_string('excused', 'qratt');
+                        $totalexcused++;
                         break;
                     default:
                         $row[] = get_string('absent', 'qratt');
-                        $totalabsent++;
                 }
             } else {
                 $row[] = get_string('absent', 'qratt');
-                $totalabsent++;
             }
         }
         
-        $total = count($meetings);
-        $percentage = $total > 0 ? round(($totalpresent / $total) * 100, 2) : 0;
+        $totalmeetings = count($meetings);
+        // Correctly calculate total absent count
+        $totalabsent = $totalmeetings - $totalpresent - $totalexcused;
+        // Base percentage on meetings that were not excused
+        $attendable_meetings = $totalmeetings - $totalexcused;
+        $percentage = $attendable_meetings > 0 ? round(($totalpresent / $attendable_meetings) * 100, 2) : 0;
         
         $row[] = $totalpresent;
         $row[] = $totalabsent;
