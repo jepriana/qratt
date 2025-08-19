@@ -25,8 +25,28 @@
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(__FILE__).'/lib.php');
 
+// Tangkap ID modul dan parameter lainnya dari URL
+$id = optional_param('id', 0, PARAM_INT);
 $token = required_param('token', PARAM_RAW);
 $meetingid = required_param('meeting', PARAM_INT);
+$qrurl = optional_param('qr-url', '', PARAM_URL); // Tambahkan untuk form manual
+
+// Proses URL dari form manual jika ada
+if (!empty($qrurl)) {
+    try {
+        $url_parts = new moodle_url($qrurl);
+        $meetingid = (int)$url_parts->get_param('meeting');
+        $token = (string)$url_parts->get_param('token');
+    } catch (Exception $e) {
+        // Handle invalid URL
+        print_error('invalidqrurl', 'qratt', null, $e->getMessage());
+    }
+}
+
+// Validasi dan muat data yang diperlukan
+if (empty($meetingid)) {
+    print_error('invalidmeeting', 'qratt');
+}
 
 require_login();
 

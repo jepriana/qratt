@@ -61,16 +61,17 @@ if (empty($activemeetings)) {
         html_writer::tag('div', '', array('id' => 'qr-reader', 'class' => 'qr-reader')) .
         html_writer::tag('div', 
             html_writer::tag('p', get_string('scannerresult', 'qratt'), array('id' => 'scan-result', 'class' => 'scan-result')),
-            'scan-output'
+            array('class' => 'scan-output')
         ),
         'qr-scanner-container'
     );
+    $action_url = new moodle_url('/mod/qratt/scan.php', array('id' => $cm->id));
     
     // Manual entry option
     echo html_writer::div(
         html_writer::tag('h4', get_string('manualentry', 'qratt')) .
         html_writer::tag('p', get_string('manualentryinfo', 'qratt')) .
-        html_writer::start_tag('form', array('method' => 'get', 'action' => 'scan.php')) .
+        html_writer::start_tag('form', array('method' => 'get', 'action' => $action_url)) .
         html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'meeting', 'value' => '')) .
         html_writer::tag('div',
             html_writer::tag('label', get_string('qrcode', 'qratt') . ' URL:', array('for' => 'qr-url')) .
@@ -81,7 +82,7 @@ if (empty($activemeetings)) {
                 'class' => 'form-control',
                 'placeholder' => 'https://...'
             )),
-            'form-group'
+            array('class' => 'form-group')
         ) .
         html_writer::tag('div',
             html_writer::empty_tag('input', array(
@@ -89,7 +90,7 @@ if (empty($activemeetings)) {
                 'value' => get_string('submit'),
                 'class' => 'btn btn-primary'
             )),
-            'form-group'
+            array('class' => 'form-group')
         ) .
         html_writer::end_tag('form'),
         'manual-entry mt-4'
