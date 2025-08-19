@@ -106,8 +106,12 @@ class meeting_form extends moodleform {
         
         $mform->addElement('header', 'general', get_string('meetingform', 'qratt'));
         
-        $mform->addElement('text', 'meetingnumber', get_string('meetingnumber', 'qratt'));
-        $mform->setType('meetingnumber', PARAM_INT);
+        $options = array();
+        for ($i = 1; $i <= 16; $i++) {
+            $options[$i] = $i;
+        }
+
+        $mform->addElement('select', 'meetingnumber', get_string('meetingnumber', 'qratt'), $options);
         $mform->addRule('meetingnumber', null, 'required', null, 'client');
         $mform->addRule('meetingnumber', null, 'numeric', null, 'client');
         
@@ -184,7 +188,7 @@ if ($action == 'add' || $action == 'edit') {
     } else if ($data = $mform->get_data()) {
         if ($meeting) {
             // Update existing meeting
-            $meeting->meetingnumber = $data->meetingnumber;
+            $meeting->meetingnumber = (int)$data->meetingnumber;
             $meeting->topic = $data->topic;
             $meeting->meetingdate = $data->meetingdate;
             $meeting->timemodified = time();
@@ -197,7 +201,7 @@ if ($action == 'add' || $action == 'edit') {
             // Create new meeting
             $newmeeting = new stdClass();
             $newmeeting->qrattid = $qratt->id;
-            $newmeeting->meetingnumber = $data->meetingnumber;
+            $newmeeting->meetingnumber = (int)$data->meetingnumber;
             $newmeeting->topic = $data->topic;
             $newmeeting->meetingdate = $data->meetingdate;
             $newmeeting->status = QRATT_MEETING_INACTIVE;
@@ -289,7 +293,7 @@ if ($action == 'add' || $action == 'edit') {
                 get_string('edit', 'moodle'),
                 array('class' => 'btn btn-secondary btn-sm')
             );
-            
+
             $actions[] = html_writer::link(
                 new moodle_url('/mod/qratt/meetings.php', 
                     array('id' => $cm->id, 'action' => 'delete', 'meetingid' => $meeting->id, 'sesskey' => sesskey())),
@@ -317,3 +321,4 @@ if ($action == 'add' || $action == 'edit') {
 }
 
 echo $OUTPUT->footer();
+

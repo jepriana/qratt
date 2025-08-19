@@ -52,9 +52,17 @@ if ($download == 'csv') {
     $csvexport = new csv_export_writer();
     $csvexport->set_filename($filename);
     
-    // Get all meetings and enrolled users
+    // Get all meetings
     $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC');
-    $enrolledusers = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname');
+    
+    // Get only students enrolled in the course
+    $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+    if (!$studentrole) {
+        // Handle error if student role is not found
+        print_error('rolenotfound', 'qratt');
+    }
+    
+    $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
     
     // Build CSV headers
     $headers = array(get_string('firstname'), get_string('lastname'), get_string('email'));
@@ -68,7 +76,7 @@ if ($download == 'csv') {
     $csvexport->add_data($headers);
     
     // Build CSV data
-    foreach ($enrolledusers as $user) {
+    foreach ($students as $user) { // Ganti $enrolledusers menjadi $students
         $row = array($user->firstname, $user->lastname, $user->email);
         
         $totalpresent = 0;
@@ -244,10 +252,13 @@ switch ($action) {
         // Report by student
         echo $OUTPUT->heading(get_string('reportbystudent', 'qratt'), 2);
         
-        $enrolledusers = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname');
+        // Filter by student role
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
+        
         $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC');
         
-        if (!$enrolledusers) {
+        if (!$students) { // Ganti $enrolledusers menjadi $students
             echo $OUTPUT->notification(get_string('nousers', 'qratt'), 'notifymessage');
             break;
         }
@@ -271,13 +282,14 @@ switch ($action) {
         $table->head[] = get_string('totalpresent', 'qratt');
         $table->head[] = get_string('percentage', 'qratt');
         
-        foreach ($enrolledusers as $user) {
+        foreach ($students as $user) { // Ganti $enrolledusers menjadi $students
             $row = array(
                 $user->firstname . ' ' . $user->lastname,
                 $user->email
             );
             
             $totalpresent = 0;
+            $totalexcused = 0; // Tambahkan ini untuk perhitungan yang lebih akurat
             
             foreach ($meetings as $meeting) {
                 $attendance = $DB->get_record('qratt_attendance', 
@@ -295,6 +307,7 @@ switch ($action) {
                             break;
                         case QRATT_STATUS_EXCUSED:
                             $row[] = html_writer::span(get_string('excused', 'qratt'), 'badge badge-info');
+                            $totalexcused++; // Tambahkan ini
                             break;
                         default:
                             $row[] = html_writer::span(get_string('absent', 'qratt'), 'badge badge-danger');
@@ -305,9 +318,11 @@ switch ($action) {
             }
             
             $totalmeetings = count($meetings);
-            $percentage = $totalmeetings > 0 ? round(($totalpresent / $totalmeetings) * 100, 2) : 0;
+            // Hitung total pertemuan yang dapat dihadiri (mengabaikan yang diizinkan)
+            $attendable_meetings = $totalmeetings - $totalexcused; 
+            $percentage = $attendable_meetings > 0 ? round(($totalpresent / $attendable_meetings) * 100, 2) : 0;
             
-            $row[] = $totalpresent . '/' . $totalmeetings;
+            $row[] = $totalpresent . '/' . $attendable_meetings;
             $row[] = $percentage . '%';
             
             $table->data[] = $row;
@@ -320,11 +335,13 @@ switch ($action) {
         // Overview report
         echo $OUTPUT->heading(get_string('attendanceoverview', 'qratt'), 2);
         
-        $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id));
-        $enrolledusers = get_enrolled_users($context, 'mod/qratt:canbelisted');
+        // Filter by student role
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id', 'u.lastname', 0, '', '', '', 0, $studentrole->id);
+        $totalstudents = count($students);
         
+        $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id));
         $totalmeetings = count($meetings);
-        $totalstudents = count($enrolledusers);
         
         if ($totalmeetings == 0 || $totalstudents == 0) {
             echo $OUTPUT->notification(get_string('nodata', 'qratt'), 'notifymessage');

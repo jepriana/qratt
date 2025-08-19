@@ -8,19 +8,19 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * QR Code scanning endpoint for QR Attendance
- *
- * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+ * QR Code scanning endpoint for QR Attendance
+ *
+ * @package    mod_qratt
+ * @copyright  2024 QR Attendance Team
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(__FILE__).'/lib.php');
@@ -54,6 +54,8 @@ require_login();
 $meeting = $DB->get_record('qratt_meetings', array('id' => $meetingid), '*', MUST_EXIST);
 $qratt = $DB->get_record('qratt', array('id' => $meeting->qrattid), '*', MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $qratt->course), '*', MUST_EXIST);
+
+// Muat CM dari instansinya. Ini akan mengatasi masalah ID yang hilang.
 $cm = get_coursemodule_from_instance('qratt', $qratt->id, $course->id, false, MUST_EXIST);
 
 // Check if user is enrolled in the course
@@ -65,10 +67,12 @@ if (!is_enrolled($context, $USER->id)) {
 $modulecontext = context_module::instance($cm->id);
 require_capability('mod/qratt:takeattendance', $modulecontext);
 
-$PAGE->set_url('/mod/qratt/scan.php', array('token' => $token, 'meeting' => $meetingid));
+// Setel informasi halaman Moodle
+$PAGE->set_url('/mod/qratt/scan.php', array('token' => $token, 'meeting' => $meetingid, 'id' => $cm->id));
 $PAGE->set_title(get_string('scanqr', 'qratt'));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);
+$PAGE->set_cm($cm); // Tambahkan baris ini untuk memvalidasi cm
 
 $currenttime = time();
 
@@ -185,7 +189,7 @@ echo html_writer::div(
         html_writer::tag('p', get_string('yourstatus', 'qratt') . ': ' . html_writer::tag('strong', $statustext), array('class' => 'lead')),
         array('class' => 'text-center')
     ),
-    'attendance-success p-4'
+    array('class' => 'attendance-success p-4')
 );
 
 // Show meeting details
@@ -195,13 +199,13 @@ echo html_writer::div(
     html_writer::tag('p', html_writer::tag('strong', get_string('topic', 'qratt') . ': ') . $meeting->topic) .
     html_writer::tag('p', html_writer::tag('strong', get_string('date', 'qratt') . ': ') . userdate($meeting->meetingdate)) .
     html_writer::tag('p', html_writer::tag('strong', get_string('scantime', 'qratt') . ': ') . userdate($currenttime)),
-    'meeting-details mt-4 p-3 bg-light'
+    array('class' => 'meeting-details mt-4 p-3 bg-light')
 );
 
 echo html_writer::div(
     $OUTPUT->single_button(new moodle_url('/mod/qratt/view.php', array('id' => $cm->id)), 
                           get_string('continueto', 'qratt', $qratt->name), 'get'),
-    'continue-button mt-3 text-center'
+    array('class' => 'continue-button mt-3 text-center')
 );
 
 ?>

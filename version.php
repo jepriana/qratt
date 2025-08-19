@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024063004;        // The current module version (Date: YYYYMMDDXX).
+$plugin->version   = 2024063011;        // The current module version (Date: YYYYMMDDXX).
 $plugin->requires  = 2022090200; // 2024042200;        // Requires Moodle 4.5.
 $plugin->release   = 2025070404;
 $plugin->component = 'mod_qratt';       // Full name of the plugin (used for diagnostics).
