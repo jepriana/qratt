@@ -32,11 +32,51 @@ function xmldb_qratt_install() {
 
     // Define default attendance statuses
     $defaultstatuses = array(
-        array('statusvalue' => 1, 'description' => 'Present', 'grade' => 1.00, 'visible' => 1),
-        array('statusvalue' => 2, 'description' => 'Absent', 'grade' => 0.00, 'visible' => 1),
-        array('statusvalue' => 3, 'description' => 'Late', 'grade' => 0.50, 'visible' => 1),
-        array('statusvalue' => 4, 'description' => 'Excused', 'grade' => 0.00, 'visible' => 1)
+        array(
+            'statusvalue' => 1, 
+            'description' => 'Present', 
+            'grade' => 1.00, 
+            'visible' => 1, 
+            'sortorder' => 1,
+            'timecreated' => time(),
+            'timemodified' => time()
+        ),
+        array(
+            'statusvalue' => 2, 
+            'description' => 'Absent', 
+            'grade' => 0.00, 
+            'visible' => 1, 
+            'sortorder' => 4,
+            'timecreated' => time(),
+            'timemodified' => time()
+        ),
+        array(
+            'statusvalue' => 3, 
+            'description' => 'Late', 
+            'grade' => 0.50, 
+            'visible' => 1, 
+            'sortorder' => 2,
+            'timecreated' => time(),
+            'timemodified' => time()
+        ),
+        array(
+            'statusvalue' => 4, 
+            'description' => 'Excused', 
+            'grade' => 0.00, 
+            'visible' => 1, 
+            'sortorder' => 3,
+            'timecreated' => time(),
+            'timemodified' => time()
+        )
     );
+
+    // Insert default statuses
+    foreach ($defaultstatuses as $status) {
+        // Check if status already exists to avoid duplicates
+        if (!$DB->record_exists('qratt_statuses', array('statusvalue' => $status['statusvalue']))) {
+            $DB->insert_record('qratt_statuses', (object)$status);
+        }
+    }
 
     return true;
 }

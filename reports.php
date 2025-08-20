@@ -168,90 +168,78 @@ switch ($action) {
             break;
         }
         
+        // Get all students once
+        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
+
         foreach ($meetings as $meeting) {
             echo $OUTPUT->heading(get_string('meeting', 'qratt') . ' ' . $meeting->meetingnumber . ': ' . $meeting->topic, 3);
             
-            // Get only students enrolled in the course for this meeting
-            $sql = "SELECT u.id, u.firstname, u.lastname, u.email, a.status, a.scantime
-                    FROM {user} u
-                    LEFT JOIN {qratt_attendance} a ON (a.userid = u.id AND a.meetingid = ?)
-                    WHERE u.id IN (
-                        SELECT DISTINCT eu.userid 
-                        FROM {enrol} e 
-                        JOIN {user_enrolments} eu ON e.id = eu.enrolid 
-                        JOIN {role_assignments} ra ON eu.userid = ra.userid
-                        WHERE e.courseid = ? AND e.status = 0 AND eu.status = 0 
-                        AND ra.roleid = ? AND ra.contextid = ?
-                    )
-                    ORDER BY u.lastname, u.firstname";
+            $table = new html_table();
+            $table->head = array(
+                get_string('student', 'qratt'),
+                get_string('email'),
+                get_string('status', 'qratt'),
+                get_string('scantime', 'qratt')
+            );
             
-            $attendees = $DB->get_records_sql($sql, array($meeting->id, $course->id, $studentrole->id, $context->id));
+            $present = 0;
+            $late = 0;
+            $excused = 0;
+            $absent = 0;
             
-            if ($attendees) {
-                $table = new html_table();
-                $table->head = array(
-                    get_string('student', 'qratt'),
-                    get_string('email'),
-                    get_string('status', 'qratt'),
-                    get_string('scantime', 'qratt')
-                );
+            foreach ($students as $student) {
+                $attendance = $DB->get_record('qratt_attendance', 
+                    array('meetingid' => $meeting->id, 'userid' => $student->id));
                 
-                $present = 0;
-                $late = 0;
-                $excused = 0;
-                $absent = 0;
+                $statustext = get_string('absent', 'qratt');
+                $scantime = '-';
                 
-                foreach ($attendees as $attendee) {
-                    $statustext = get_string('absent', 'qratt');
-                    $scantime = '-';
-                    
-                    if ($attendee->status !== null) {
-                        switch ($attendee->status) {
-                            case QRATT_STATUS_PRESENT:
-                                $statustext = get_string('present', 'qratt');
-                                $present++;
-                                break;
-                            case QRATT_STATUS_LATE:
-                                $statustext = get_string('late', 'qratt');
-                                $late++;
-                                break;
-                            case QRATT_STATUS_EXCUSED:
-                                $statustext = get_string('excused', 'qratt');
-                                $excused++;
-                                break;
-                            default:
-                                $absent++;
-                        }
-                        
-                        if ($attendee->scantime) {
-                            $scantime = userdate($attendee->scantime, get_string('strftimedatetimeshort'));
-                        }
-                    } else {
-                        $absent++;
+                if ($attendance) {
+                    switch ($attendance->status) {
+                        case QRATT_STATUS_PRESENT:
+                            $statustext = get_string('present', 'qratt');
+                            $present++;
+                            break;
+                        case QRATT_STATUS_LATE:
+                            $statustext = get_string('late', 'qratt');
+                            $late++;
+                            break;
+                        case QRATT_STATUS_EXCUSED:
+                            $statustext = get_string('excused', 'qratt');
+                            $excused++;
+                            break;
+                        default:
+                            $absent++;
                     }
                     
-                    $table->data[] = array(
-                        $attendee->firstname . ' ' . $attendee->lastname,
-                        $attendee->email,
-                        $statustext,
-                        $scantime
-                    );
+                    if ($attendance->scantime) {
+                        $scantime = userdate($attendance->scantime, get_string('strftimedatetimeshort'));
+                    }
+                } else {
+                    $absent++;
                 }
                 
-                echo html_writer::table($table);
-                
-                // Summary
-                $total = count($attendees);
-                echo html_writer::div(
-                    html_writer::tag('strong', get_string('summary', 'qratt') . ': ') .
-                    get_string('present', 'qratt') . ': ' . $present . ' | ' .
-                    get_string('late', 'qratt') . ': ' . $late . ' | ' .
-                    get_string('excused', 'qratt') . ': ' . $excused . ' | ' .
-                    get_string('absent', 'qratt') . ': ' . $absent . ' | ' .
-                    get_string('total') . ': ' . $total,
-                    'meeting-summary mb-4 p-2 bg-light'
+                $table->data[] = array(
+                    $student->firstname . ' ' . $student->lastname,
+                    $student->email,
+                    $statustext,
+                    $scantime
                 );
             }
+            
+            echo html_writer::table($table);
+            
+            // Summary
+            $total = count($students);
+            echo html_writer::div(
+                html_writer::tag('strong', get_string('summary', 'qratt') . ': ') .
+                get_string('present', 'qratt') . ': ' . $present . ' | ' .
+                get_string('late', 'qratt') . ': ' . $late . ' | ' .
+                get_string('excused', 'qratt') . ': ' . $excused . ' | ' .
+                get_string('absent', 'qratt') . ': ' . $absent . ' | ' .
+                get_string('total') . ': ' . $total,
+                'meeting-summary mb-4 p-2 bg-light'
+            );
         }
         break;
         
@@ -356,29 +344,35 @@ switch ($action) {
         }
         
         // Overall statistics
-        $sql = "SELECT 
-                    COUNT(CASE WHEN a.status = ? THEN 1 END) as present,
-                    COUNT(CASE WHEN a.status = ? THEN 1 END) as late,
-                    COUNT(CASE WHEN a.status = ? THEN 1 END) as excused,
-                    COUNT(CASE WHEN a.status = ? OR a.status IS NULL THEN 1 END) as absent
-                FROM {qratt_meetings} m
-                LEFT JOIN {qratt_attendance} a ON m.id = a.meetingid
-                WHERE m.qrattid = ?";
+        $present = 0;
+        $late = 0;
+        $excused = 0;
         
-        $stats = $DB->get_record_sql($sql, array(
-            QRATT_STATUS_PRESENT, 
-            QRATT_STATUS_LATE, 
-            QRATT_STATUS_EXCUSED, 
-            QRATT_STATUS_ABSENT, 
-            $qratt->id
-        ));
+        // Get all attendance records for students in all meetings at once for efficiency
+        $studentids = array_keys($students);
+        $sql = 'SELECT meetingid, userid, status FROM {qratt_attendance} WHERE userid IN (' . implode(',', $studentids) . ') AND meetingid IN (' . implode(',', array_keys($meetings)) . ')';
+        $attendances = $DB->get_records_sql($sql);
+
+        foreach ($attendances as $record) {
+            switch ($record->status) {
+                case QRATT_STATUS_PRESENT:
+                    $present++;
+                    break;
+                case QRATT_STATUS_LATE:
+                    $late++;
+                    break;
+                case QRATT_STATUS_EXCUSED:
+                    $excused++;
+                    break;
+            }
+        }
         
-        // Calculate totals including non-recorded attendance
+        // Calculate totals
         $totalexpected = $totalmeetings * $totalstudents;
-        $totalrecorded = $stats->present + $stats->late + $stats->excused;
+        $totalrecorded = $present + $late + $excused;
         $totalabsent = $totalexpected - $totalrecorded;
         
-        $overallpercentage = $totalexpected > 0 ? round((($stats->present + $stats->late) / $totalexpected) * 100, 2) : 0;
+        $overallpercentage = $totalexpected > 0 ? round((($present + $late) / $totalexpected) * 100, 2) : 0;
         
         // Display statistics
         echo html_writer::div(
@@ -391,9 +385,9 @@ switch ($action) {
             ) .
             html_writer::tag('div',
                 html_writer::tag('h4', get_string('attendancebreakdown', 'qratt')) .
-                html_writer::tag('p', get_string('present', 'qratt') . ': ' . $stats->present) .
-                html_writer::tag('p', get_string('late', 'qratt') . ': ' . $stats->late) .
-                html_writer::tag('p', get_string('excused', 'qratt') . ': ' . $stats->excused) .
+                html_writer::tag('p', get_string('present', 'qratt') . ': ' . $present) .
+                html_writer::tag('p', get_string('late', 'qratt') . ': ' . $late) .
+                html_writer::tag('p', get_string('excused', 'qratt') . ': ' . $excused) .
                 html_writer::tag('p', get_string('absent', 'qratt') . ': ' . $totalabsent),
                 array('class' => 'col-md-4')
             ),
@@ -416,30 +410,40 @@ switch ($action) {
         );
         
         foreach ($meetings as $meeting) {
-            $sql = "SELECT 
-                        COUNT(CASE WHEN a.status = ? THEN 1 END) as present,
-                        COUNT(CASE WHEN a.status = ? THEN 1 END) as late,
-                        COUNT(CASE WHEN a.status = ? THEN 1 END) as excused
-                    FROM {qratt_attendance} a
-                    WHERE a.meetingid = ?";
+            $meeting_present = 0;
+            $meeting_late = 0;
+            $meeting_excused = 0;
             
-            $meetingstats = $DB->get_record_sql($sql, array(
-                QRATT_STATUS_PRESENT,
-                QRATT_STATUS_LATE,
-                QRATT_STATUS_EXCUSED,
-                $meeting->id
-            ));
+            // Count attendance for this meeting for only students
+            foreach ($students as $student) {
+                $attendance = $DB->get_record('qratt_attendance', 
+                    array('meetingid' => $meeting->id, 'userid' => $student->id));
+                
+                if ($attendance) {
+                    switch ($attendance->status) {
+                        case QRATT_STATUS_PRESENT:
+                            $meeting_present++;
+                            break;
+                        case QRATT_STATUS_LATE:
+                            $meeting_late++;
+                            break;
+                        case QRATT_STATUS_EXCUSED:
+                            $meeting_excused++;
+                            break;
+                    }
+                }
+            }
             
-            $meetingabsent = $totalstudents - ($meetingstats->present + $meetingstats->late + $meetingstats->excused);
-            $meetingpercentage = $totalstudents > 0 ? round((($meetingstats->present + $meetingstats->late) / $totalstudents) * 100, 2) : 0;
+            $meetingabsent = $totalstudents - ($meeting_present + $meeting_late + $meeting_excused);
+            $meetingpercentage = $totalstudents > 0 ? round((($meeting_present + $meeting_late) / $totalstudents) * 100, 2) : 0;
             
             $table->data[] = array(
                 $meeting->meetingnumber,
                 $meeting->topic,
                 userdate($meeting->meetingdate, get_string('strftimedaydate')),
-                $meetingstats->present,
-                $meetingstats->late,
-                $meetingstats->excused,
+                $meeting_present,
+                $meeting_late,
+                $meeting_excused,
                 $meetingabsent,
                 $meetingpercentage . '%'
             );

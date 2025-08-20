@@ -103,6 +103,7 @@ $string['error:cannotactivate'] = 'Tidak dapat mengaktifkan pertemuan';
 $string['error:meetingnotactive'] = 'Pertemuan tidak aktif';
 $string['error:alreadyended'] = 'Pertemuan sudah berakhir';
 $string['error:rolenotfound'] = 'Peran mahasiswa tidak ditemukan dalam sistem';
+$string['cannotmarkattendance'] = 'Tidak dapat menandai kehadiran. Silakan coba lagi.';
 
 // Additional strings
 $string['timeremaining'] = 'Waktu tersisa';

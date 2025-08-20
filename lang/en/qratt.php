@@ -103,6 +103,7 @@ $string['error:cannotactivate'] = 'Cannot activate meeting';
 $string['error:meetingnotactive'] = 'Meeting is not active';
 $string['error:alreadyended'] = 'Meeting has already ended';
 $string['error:rolenotfound'] = 'Student role not found in the system';
+$string['cannotmarkattendance'] = 'Cannot mark attendance. Please try again.';
 
 // Additional strings
 $string['timeremaining'] = 'Time remaining';

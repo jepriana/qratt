@@ -79,9 +79,6 @@ function qratt_add_instance(stdClass $qratt, mod_qratt_mod_form $mform = null) {
 
     $qratt->id = $DB->insert_record('qratt', $qratt);
 
-    // Create default attendance statuses for this instance
-    qratt_create_default_statuses($qratt->id);
-
     return $qratt->id;
 }
 
@@ -115,8 +112,6 @@ function qratt_delete_instance($id) {
     }
 
     // Delete all related records
-    $DB->delete_records('qratt_statuses', array('qrattid' => $id));
-    
     $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $id));
     foreach ($meetings as $meeting) {
         $DB->delete_records('qratt_attendance', array('meetingid' => $meeting->id));
@@ -258,25 +253,6 @@ function qratt_get_recent_mod_activity(&$activities, &$index, $timestart, $cours
 function qratt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
 }
 
-/**
- * Create default attendance statuses for a new qratt instance
- *
- * @param int $qrattid The qratt instance id
- */
-function qratt_create_default_statuses($qrattid) {
-    global $DB;
-
-    $defaultstatuses = array(
-        array('qrattid' => $qrattid, 'statusvalue' => QRATT_STATUS_PRESENT, 'description' => 'Present', 'grade' => 1.00, 'visible' => 1),
-        array('qrattid' => $qrattid, 'statusvalue' => QRATT_STATUS_ABSENT, 'description' => 'Absent', 'grade' => 0.00, 'visible' => 1),
-        array('qrattid' => $qrattid, 'statusvalue' => QRATT_STATUS_LATE, 'description' => 'Late', 'grade' => 0.50, 'visible' => 1),
-        array('qrattid' => $qrattid, 'statusvalue' => QRATT_STATUS_EXCUSED, 'description' => 'Excused', 'grade' => 0.00, 'visible' => 1)
-    );
-
-    foreach ($defaultstatuses as $status) {
-        $DB->insert_record('qratt_statuses', $status);
-    }
-}
 
 /**
  * Generate a QR code for a meeting
