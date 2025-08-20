@@ -44,6 +44,12 @@ require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
 
+// Check if user has manage capability - if so, redirect to meetings overview
+$canmanage = has_capability('mod/qratt:manage', $context);
+if ($canmanage) {
+    redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)));
+}
+
 // Print the page header.
 $PAGE->set_url('/mod/qratt/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($qratt->name));
@@ -73,6 +79,8 @@ $tabs[] = new tabobject('view', new moodle_url('/mod/qratt/view.php', array('id'
 if ($canmanage) {
     $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
                             get_string('meetings', 'qratt'));
+    $tabs[] = new tabobject('attendance', new moodle_url('/mod/qratt/attendance.php', array('id' => $cm->id)), 
+                            get_string('manualattendance', 'qratt'));
     $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
                             get_string('reports', 'qratt'));
 }

@@ -102,6 +102,7 @@ $string['error:meetingnotfound'] = 'Meeting not found';
 $string['error:cannotactivate'] = 'Cannot activate meeting';
 $string['error:meetingnotactive'] = 'Meeting is not active';
 $string['error:alreadyended'] = 'Meeting has already ended';
+$string['error:rolenotfound'] = 'Student role not found in the system';
 
 // Additional strings
 $string['timeremaining'] = 'Time remaining';
@@ -146,6 +147,24 @@ $string['scannerresult'] = 'Scan result will appear here...';
 $string['manualentry'] = 'Manual Entry';
 $string['manualentryinfo'] = 'If the camera scanner is not working, you can manually enter the QR code URL:';
 $string['invalidqrurl'] = 'Invalid QR code URL. Please check the URL and try again.';
+
+// Manual attendance
+$string['manualattendance'] = 'Manual Attendance';
+$string['selectmeeting'] = 'Select Meeting';
+$string['selectmeetinginfo'] = 'Select a meeting to manage attendance manually.';
+$string['manageattendance'] = 'Manage Attendance';
+$string['manualattendancefor'] = 'Attendance for: {$a}';
+$string['currentstatus'] = 'Current Status';
+$string['setattendance'] = 'Set Attendance';
+$string['saveattendance'] = 'Save Attendance';
+$string['attendanceupdated'] = 'Attendance updated: {$a->saved} new records saved, {$a->updated} records updated.';
+$string['notset'] = 'Not Set';
+$string['nostudents'] = 'No students found in this course.';
+$string['back'] = 'Back';
+$string['managemeetings'] = 'Manage Meetings';
+$string['meetingsoverview'] = 'Meetings Overview';
+$string['bulkselection'] = 'Bulk Selection';
+$string['bulkselectionhelp'] = 'Select an attendance status below to set all students to that status at once. You can then modify individual students as needed.';
 
 // Events
 $string['eventcoursemoduleviewed'] = 'QR Attendance module viewed';

@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024063011;        // The current module version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022090200; // 2024042200;        // Requires Moodle 4.5.
+$plugin->version   = 2025082003;    // The current module version (Date: YYYYMMDDXX).
+$plugin->requires  = 2022090200;    // 2024042200;        // Requires Moodle 4.5.
 $plugin->release   = 2025070404;
-$plugin->component = 'mod_qratt';       // Full name of the plugin (used for diagnostics).
+$plugin->component = 'mod_qratt';   // Full name of the plugin (used for diagnostics).
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->release   = '1.0.0';

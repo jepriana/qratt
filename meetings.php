@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Meeting management for QR Attendance
+ * Meeting management and overview for QR Attendance
  *
  * @package    mod_qratt
  * @copyright  2024 QR Attendance Team
@@ -94,6 +94,51 @@ if ($action == 'delete' && $meetingid) {
     redirect($PAGE->url, get_string('meetingdeleted', 'qratt'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
+// Handle manual attendance save
+if ($action === 'saveattendance' && $meetingid && data_submitted() && confirm_sesskey()) {
+    require_capability('mod/qratt:manageattendances', $context);
+    $meeting = $DB->get_record('qratt_meetings', array('id' => $meetingid, 'qrattid' => $qratt->id), '*', MUST_EXIST);
+    
+    $attendancedata = optional_param_array('attendance', array(), PARAM_INT);
+    $saved = 0;
+    $updated = 0;
+    
+    foreach ($attendancedata as $userid => $statusid) {
+        // Skip if no status selected (value 0)
+        if ($statusid == 0) {
+            continue;
+        }
+        
+        // Check if attendance record already exists
+        $existing = $DB->get_record('qratt_attendance', array('meetingid' => $meetingid, 'userid' => $userid));
+        
+        if ($existing) {
+            // Update existing record
+            $existing->status = $statusid;
+            $existing->timemodified = time();
+            $existing->scantime = ($statusid == QRATT_STATUS_PRESENT || $statusid == QRATT_STATUS_LATE) ? time() : null;
+            $DB->update_record('qratt_attendance', $existing);
+            $updated++;
+        } else {
+            // Create new record
+            $newrecord = new stdClass();
+            $newrecord->meetingid = $meetingid;
+            $newrecord->userid = $userid;
+            $newrecord->status = $statusid;
+            $newrecord->scantime = ($statusid == QRATT_STATUS_PRESENT || $statusid == QRATT_STATUS_LATE) ? time() : null;
+            $newrecord->timecreated = time();
+            $newrecord->timemodified = time();
+            $DB->insert_record('qratt_attendance', $newrecord);
+            $saved++;
+        }
+    }
+    
+    // Redirect with success message
+    $message = get_string('attendanceupdated', 'qratt', array('saved' => $saved, 'updated' => $updated));
+    redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'attendance', 'meetingid' => $meetingid)), 
+             $message, null, \core\output\notification::NOTIFY_SUCCESS);
+}
+
 /**
  * Meeting form class
  */
@@ -164,10 +209,13 @@ class meeting_form extends moodleform {
 // Output starts here
 echo $OUTPUT->header();
 
+// Conditions to show the intro can change to look for own settings or whatever.
+if ($qratt->intro) {
+    echo $OUTPUT->box(format_module_intro('qratt', $qratt, $cm->id), 'generalbox mod_introbox', 'qrattintro');
+}
+
 // Display navigation tabs
 $tabs = array();
-$tabs[] = new tabobject('view', new moodle_url('/mod/qratt/view.php', array('id' => $cm->id)), 
-                        get_string('overview', 'qratt'));
 $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
                         get_string('meetings', 'qratt'));
 $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
@@ -175,6 +223,9 @@ $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', arra
 
 echo $OUTPUT->tabtree($tabs, 'meetings');
 
+// No sub-tabs needed - unified meetings view
+
+// Handle different actions
 if ($action == 'add' || $action == 'edit') {
     $meeting = null;
     if ($action == 'edit' && $meetingid) {
@@ -184,7 +235,7 @@ if ($action == 'add' || $action == 'edit') {
     $mform = new meeting_form(null, array('qratt' => $qratt, 'meeting' => $meeting));
     
     if ($mform->is_cancelled()) {
-        redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)));
+        redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')));
     } else if ($data = $mform->get_data()) {
         if ($meeting) {
             // Update existing meeting
@@ -195,7 +246,7 @@ if ($action == 'add' || $action == 'edit') {
             
             $DB->update_record('qratt_meetings', $meeting);
             
-            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')), 
                     get_string('meetingupdated', 'qratt'), null, \core\output\notification::NOTIFY_SUCCESS);
         } else {
             // Create new meeting
@@ -210,7 +261,7 @@ if ($action == 'add' || $action == 'edit') {
             
             $DB->insert_record('qratt_meetings', $newmeeting);
             
-            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')), 
                     get_string('meetingcreated', 'qratt'), null, \core\output\notification::NOTIFY_SUCCESS);
         }
     }
@@ -231,16 +282,418 @@ if ($action == 'add' || $action == 'edit') {
     }
     
     $mform->display();
+
+} else if ($action == 'attendance' && $meetingid) {
+    // Manual attendance input
+    require_capability('mod/qratt:manageattendances', $context);
+    $meeting = $DB->get_record('qratt_meetings', array('id' => $meetingid, 'qrattid' => $qratt->id), '*', MUST_EXIST);
     
+    echo $OUTPUT->heading(get_string('manualattendancefor', 'qratt', $meeting->topic), 2);
+    
+    // Meeting information
+    echo html_writer::div(
+        html_writer::tag('strong', get_string('meetingnumber', 'qratt') . ': ') . $meeting->meetingnumber . html_writer::empty_tag('br') .
+        html_writer::tag('strong', get_string('topic', 'qratt') . ': ') . $meeting->topic . html_writer::empty_tag('br') .
+        html_writer::tag('strong', get_string('date', 'qratt') . ': ') . userdate($meeting->meetingdate),
+        'meeting-info mb-3 p-3 bg-light border-left-primary'
+    );
+    
+    // Get students enrolled in the course (only users with student role)
+    $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+    if (!$studentrole) {
+        echo $OUTPUT->notification(get_string('error:rolenotfound', 'qratt'), 'notifyproblem');
+        echo $OUTPUT->footer();
+        exit;
+    }
+    
+    // Get users enrolled with student role only
+    $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 
+                                 'u.id, u.firstname, u.lastname, u.email', 
+                                 'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
+    
+    if (!$students) {
+        echo $OUTPUT->notification(get_string('nostudents', 'qratt'), 'notifymessage');
+    } else {
+        // Get current attendance records for this meeting
+        $attendances = $DB->get_records('qratt_attendance', array('meetingid' => $meetingid), '', 'userid, status, scantime');
+        
+        echo html_writer::start_tag('form', array(
+            'method' => 'post',
+            'action' => new moodle_url('/mod/qratt/meetings.php'),
+            'class' => 'attendance-form'
+        ));
+        
+        echo html_writer::empty_tag('input', array(
+            'type' => 'hidden',
+            'name' => 'sesskey',
+            'value' => sesskey()
+        ));
+        
+        echo html_writer::empty_tag('input', array(
+            'type' => 'hidden',
+            'name' => 'id',
+            'value' => $cm->id
+        ));
+        
+        echo html_writer::empty_tag('input', array(
+            'type' => 'hidden',
+            'name' => 'meetingid',
+            'value' => $meetingid
+        ));
+        
+        echo html_writer::empty_tag('input', array(
+            'type' => 'hidden',
+            'name' => 'action',
+            'value' => 'saveattendance'
+        ));
+        
+        // Bulk selection section
+        echo html_writer::div(
+            html_writer::tag('h4', get_string('bulkselection', 'qratt'), array('class' => 'mb-3')) .
+            html_writer::tag('p', get_string('bulkselectionhelp', 'qratt'), array('class' => 'text-muted mb-3')) .
+            html_writer::div(
+                html_writer::tag('label', 
+                    html_writer::empty_tag('input', array(
+                        'type' => 'radio',
+                        'name' => 'bulk_status',
+                        'value' => '0',
+                        'class' => 'mr-1 bulk-radio',
+                        'data-status' => '0'
+                    )) . get_string('notset', 'qratt'),
+                    array('class' => 'radio-option mr-3')
+                ) .
+                html_writer::tag('label', 
+                    html_writer::empty_tag('input', array(
+                        'type' => 'radio',
+                        'name' => 'bulk_status',
+                        'value' => QRATT_STATUS_PRESENT,
+                        'class' => 'mr-1 bulk-radio',
+                        'data-status' => QRATT_STATUS_PRESENT
+                    )) . get_string('present', 'qratt'),
+                    array('class' => 'radio-option mr-3 text-success')
+                ) .
+                html_writer::tag('label', 
+                    html_writer::empty_tag('input', array(
+                        'type' => 'radio',
+                        'name' => 'bulk_status',
+                        'value' => QRATT_STATUS_LATE,
+                        'class' => 'mr-1 bulk-radio',
+                        'data-status' => QRATT_STATUS_LATE
+                    )) . get_string('late', 'qratt'),
+                    array('class' => 'radio-option mr-3 text-warning')
+                ) .
+                html_writer::tag('label', 
+                    html_writer::empty_tag('input', array(
+                        'type' => 'radio',
+                        'name' => 'bulk_status',
+                        'value' => QRATT_STATUS_ABSENT,
+                        'class' => 'mr-1 bulk-radio',
+                        'data-status' => QRATT_STATUS_ABSENT
+                    )) . get_string('absent', 'qratt'),
+                    array('class' => 'radio-option mr-3 text-danger')
+                ) .
+                html_writer::tag('label', 
+                    html_writer::empty_tag('input', array(
+                        'type' => 'radio',
+                        'name' => 'bulk_status',
+                        'value' => QRATT_STATUS_EXCUSED,
+                        'class' => 'mr-1 bulk-radio',
+                        'data-status' => QRATT_STATUS_EXCUSED
+                    )) . get_string('excused', 'qratt'),
+                    array('class' => 'radio-option mr-3 text-info')
+                ),
+                'bulk-options'
+            ),
+            'bulk-selection p-3 mb-4 bg-light border rounded'
+        );
+        
+        // Attendance input table
+        $table = new html_table();
+        $table->head = array(
+            get_string('student', 'qratt'),
+            get_string('email'),
+            get_string('currentstatus', 'qratt'),
+            get_string('setattendance', 'qratt')
+        );
+        $table->attributes['class'] = 'attendance-table generaltable';
+        
+        foreach ($students as $student) {
+            $currentstatus = isset($attendances[$student->id]) ? $attendances[$student->id]->status : null;
+            $scantime = isset($attendances[$student->id]) ? $attendances[$student->id]->scantime : null;
+            
+            // Current status display
+            $currentstatustext = get_string('notset', 'qratt');
+            $currentstatusclass = 'text-muted';
+            
+            if ($currentstatus !== null) {
+                switch ($currentstatus) {
+                    case QRATT_STATUS_PRESENT:
+                        $currentstatustext = get_string('present', 'qratt');
+                        $currentstatusclass = 'text-success';
+                        break;
+                    case QRATT_STATUS_LATE:
+                        $currentstatustext = get_string('late', 'qratt');
+                        $currentstatusclass = 'text-warning';
+                        break;
+                    case QRATT_STATUS_EXCUSED:
+                        $currentstatustext = get_string('excused', 'qratt');
+                        $currentstatusclass = 'text-info';
+                        break;
+                    case QRATT_STATUS_ABSENT:
+                        $currentstatustext = get_string('absent', 'qratt');
+                        $currentstatusclass = 'text-danger';
+                        break;
+                }
+                
+                if ($scantime) {
+                    $currentstatustext .= html_writer::tag('small', 
+                        html_writer::empty_tag('br') . get_string('scantime', 'qratt') . ': ' . userdate($scantime, get_string('strftimetime')),
+                        array('class' => 'text-muted')
+                    );
+                }
+            }
+            
+            // Radio buttons for attendance status
+            $radiooptions = '';
+            
+            // None/Not Set option
+            $checked = ($currentstatus === null) ? 'checked' : '';
+            $radiooptions .= html_writer::tag('label', 
+                html_writer::empty_tag('input', array(
+                    'type' => 'radio',
+                    'name' => 'attendance[' . $student->id . ']',
+                    'value' => '0',
+                    'class' => 'mr-1',
+                    $checked => $checked
+                )) . get_string('notset', 'qratt'),
+                array('class' => 'radio-option mr-3')
+            );
+            
+            // Present option
+            $checked = ($currentstatus == QRATT_STATUS_PRESENT) ? 'checked' : '';
+            $radiooptions .= html_writer::tag('label', 
+                html_writer::empty_tag('input', array(
+                    'type' => 'radio',
+                    'name' => 'attendance[' . $student->id . ']',
+                    'value' => QRATT_STATUS_PRESENT,
+                    'class' => 'mr-1',
+                    $checked => $checked
+                )) . get_string('present', 'qratt'),
+                array('class' => 'radio-option mr-3 text-success')
+            );
+            
+            // Late option
+            $checked = ($currentstatus == QRATT_STATUS_LATE) ? 'checked' : '';
+            $radiooptions .= html_writer::tag('label', 
+                html_writer::empty_tag('input', array(
+                    'type' => 'radio',
+                    'name' => 'attendance[' . $student->id . ']',
+                    'value' => QRATT_STATUS_LATE,
+                    'class' => 'mr-1',
+                    $checked => $checked
+                )) . get_string('late', 'qratt'),
+                array('class' => 'radio-option mr-3 text-warning')
+            );
+            
+            // Absent option
+            $checked = ($currentstatus == QRATT_STATUS_ABSENT) ? 'checked' : '';
+            $radiooptions .= html_writer::tag('label', 
+                html_writer::empty_tag('input', array(
+                    'type' => 'radio',
+                    'name' => 'attendance[' . $student->id . ']',
+                    'value' => QRATT_STATUS_ABSENT,
+                    'class' => 'mr-1',
+                    $checked => $checked
+                )) . get_string('absent', 'qratt'),
+                array('class' => 'radio-option mr-3 text-danger')
+            );
+            
+            // Excused option
+            $checked = ($currentstatus == QRATT_STATUS_EXCUSED) ? 'checked' : '';
+            $radiooptions .= html_writer::tag('label', 
+                html_writer::empty_tag('input', array(
+                    'type' => 'radio',
+                    'name' => 'attendance[' . $student->id . ']',
+                    'value' => QRATT_STATUS_EXCUSED,
+                    'class' => 'mr-1',
+                    $checked => $checked
+                )) . get_string('excused', 'qratt'),
+                array('class' => 'radio-option mr-3 text-info')
+            );
+            
+            $table->data[] = array(
+                $student->firstname . ' ' . $student->lastname,
+                $student->email,
+                html_writer::span($currentstatustext, $currentstatusclass),
+                $radiooptions
+            );
+        }
+        
+        echo html_writer::table($table);
+        
+        // Form buttons
+        echo html_writer::div(
+            html_writer::empty_tag('input', array(
+                'type' => 'submit',
+                'value' => get_string('saveattendance', 'qratt'),
+                'class' => 'btn btn-primary btn-lg mr-2'
+            )) .
+            html_writer::link(
+                new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)),
+                get_string('back'),
+                array('class' => 'btn btn-secondary btn-lg')
+            ),
+            'form-buttons mt-4 text-center'
+        );
+        
+        echo html_writer::end_tag('form');
+        
+        // Attendance summary for this meeting
+        if (!empty($attendances)) {
+            echo $OUTPUT->heading(get_string('attendancesummary', 'qratt'), 3, 'mt-4');
+            
+            $present = $late = $excused = $absent = 0;
+            foreach ($attendances as $att) {
+                switch ($att->status) {
+                    case QRATT_STATUS_PRESENT:
+                        $present++;
+                        break;
+                    case QRATT_STATUS_LATE:
+                        $late++;
+                        break;
+                    case QRATT_STATUS_EXCUSED:
+                        $excused++;
+                        break;
+                    case QRATT_STATUS_ABSENT:
+                        $absent++;
+                        break;
+                }
+            }
+            
+            $totalstudents = count($students);
+            $totalset = count($attendances);
+            $notset = $totalstudents - $totalset;
+            
+            echo html_writer::div(
+                html_writer::tag('div',
+                    html_writer::tag('span', get_string('present', 'qratt') . ': ', array('class' => 'font-weight-bold')) .
+                    html_writer::tag('span', $present, array('class' => 'badge badge-success mr-3')) .
+                    html_writer::tag('span', get_string('late', 'qratt') . ': ', array('class' => 'font-weight-bold')) .
+                    html_writer::tag('span', $late, array('class' => 'badge badge-warning mr-3')) .
+                    html_writer::tag('span', get_string('excused', 'qratt') . ': ', array('class' => 'font-weight-bold')) .
+                    html_writer::tag('span', $excused, array('class' => 'badge badge-info mr-3')) .
+                    html_writer::tag('span', get_string('absent', 'qratt') . ': ', array('class' => 'font-weight-bold')) .
+                    html_writer::tag('span', $absent, array('class' => 'badge badge-danger mr-3')) .
+                    html_writer::tag('span', get_string('notset', 'qratt') . ': ', array('class' => 'font-weight-bold')) .
+                    html_writer::tag('span', $notset, array('class' => 'badge badge-secondary'))
+                ),
+                'attendance-summary p-3 bg-light border rounded'
+            );
+        }
+    }
+    
+    ?>
+    <style>
+    .attendance-form .radio-option {
+        display: inline-block;
+        margin-right: 15px;
+        margin-bottom: 5px;
+        white-space: nowrap;
+    }
+    
+    .attendance-form .radio-option input[type="radio"] {
+        margin-right: 5px;
+    }
+    
+    .attendance-table td {
+        vertical-align: middle;
+    }
+    
+    .meeting-info {
+        border-left: 4px solid #007bff !important;
+    }
+    
+    .border-left-primary {
+        border-left: 4px solid #007bff !important;
+    }
+    
+    .attendance-summary {
+        font-size: 1.1em;
+    }
+    
+    .form-buttons {
+        border-top: 1px solid #dee2e6;
+        padding-top: 20px;
+    }
+    
+    .bulk-selection {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    
+    .bulk-selection h4 {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .attendance-form .radio-option {
+            display: block;
+            margin-right: 0;
+            margin-bottom: 8px;
+        }
+        
+        .attendance-table {
+            font-size: 0.9em;
+        }
+        
+        .form-buttons .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+    </style>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle bulk selection radio buttons
+        const bulkRadios = document.querySelectorAll('.bulk-radio');
+        
+        bulkRadios.forEach(function(bulkRadio) {
+            bulkRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    const selectedStatus = this.getAttribute('data-status');
+                    
+                    // Find all student attendance radio buttons and set them to the selected status
+                    const attendanceInputs = document.querySelectorAll('input[name^="attendance["]');
+                    
+                    attendanceInputs.forEach(function(input) {
+                        if (input.value === selectedStatus) {
+                            input.checked = true;
+                        }
+                    });
+                }
+            });
+        });
+    });
+    </script>
+    <?php
+
 } else {
-    // List meetings
-    echo $OUTPUT->heading(get_string('meetings', 'qratt'));
+    // Unified meetings view
+    echo $OUTPUT->heading(get_string('meetings', 'qratt'), 2);
     
+    // Get meetings for this QR Attendance instance
     $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC');
     
     if (!$meetings) {
         echo $OUTPUT->notification(get_string('nomeetings', 'qratt'), 'notifymessage');
+        echo html_writer::tag('p', get_string('nomeetingsinfo', 'qratt'));
+        echo $OUTPUT->single_button(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'add')), 
+                                   get_string('addmeeting', 'qratt'), 'get');
     } else {
+        // Display meetings table with all actions
         $table = new html_table();
         $table->head = array(
             get_string('meetingnumber', 'qratt'),
@@ -288,6 +741,15 @@ if ($action == 'add' || $action == 'edit') {
                 );
             }
             
+            // View attendance action - always available if user has capability
+            if (has_capability('mod/qratt:manageattendances', $context)) {
+                $actions[] = html_writer::link(
+                    new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'attendance', 'meetingid' => $meeting->id)),
+                    get_string('view'),
+                    array('class' => 'btn btn-info btn-sm')
+                );
+            }
+            
             $actions[] = html_writer::link(
                 new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'edit', 'meetingid' => $meeting->id)),
                 get_string('edit', 'moodle'),
@@ -311,14 +773,15 @@ if ($action == 'add' || $action == 'edit') {
         }
         
         echo html_writer::table($table);
+        
+        // Add meeting button
+        echo html_writer::div(
+            $OUTPUT->single_button(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'add')), 
+                                 get_string('addmeeting', 'qratt'), 'get'),
+            'add-meeting-button mt-3'
+        );
     }
-    
-    echo html_writer::div(
-        $OUTPUT->single_button(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'add')), 
-                             get_string('addmeeting', 'qratt'), 'get'),
-        'add-meeting-button'
-    );
 }
 
 echo $OUTPUT->footer();
-
+?>

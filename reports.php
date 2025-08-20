@@ -131,8 +131,6 @@ echo $OUTPUT->header();
 
 // Display navigation tabs
 $tabs = array();
-$tabs[] = new tabobject('view', new moodle_url('/mod/qratt/view.php', array('id' => $cm->id)), 
-                        get_string('overview', 'qratt'));
 $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
                         get_string('meetings', 'qratt'));
 $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
@@ -163,10 +161,17 @@ switch ($action) {
             break;
         }
         
+        // Get student role for filtering
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+        if (!$studentrole) {
+            echo $OUTPUT->notification(get_string('error:rolenotfound', 'qratt'), 'notifyproblem');
+            break;
+        }
+        
         foreach ($meetings as $meeting) {
             echo $OUTPUT->heading(get_string('meeting', 'qratt') . ' ' . $meeting->meetingnumber . ': ' . $meeting->topic, 3);
             
-            // Get attendance for this meeting
+            // Get only students enrolled in the course for this meeting
             $sql = "SELECT u.id, u.firstname, u.lastname, u.email, a.status, a.scantime
                     FROM {user} u
                     LEFT JOIN {qratt_attendance} a ON (a.userid = u.id AND a.meetingid = ?)
@@ -174,11 +179,13 @@ switch ($action) {
                         SELECT DISTINCT eu.userid 
                         FROM {enrol} e 
                         JOIN {user_enrolments} eu ON e.id = eu.enrolid 
-                        WHERE e.courseid = ? AND e.status = 0 AND eu.status = 0
+                        JOIN {role_assignments} ra ON eu.userid = ra.userid
+                        WHERE e.courseid = ? AND e.status = 0 AND eu.status = 0 
+                        AND ra.roleid = ? AND ra.contextid = ?
                     )
                     ORDER BY u.lastname, u.firstname";
             
-            $attendees = $DB->get_records_sql($sql, array($meeting->id, $course->id));
+            $attendees = $DB->get_records_sql($sql, array($meeting->id, $course->id, $studentrole->id, $context->id));
             
             if ($attendees) {
                 $table = new html_table();

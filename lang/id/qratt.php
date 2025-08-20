@@ -102,6 +102,7 @@ $string['error:meetingnotfound'] = 'Pertemuan tidak ditemukan';
 $string['error:cannotactivate'] = 'Tidak dapat mengaktifkan pertemuan';
 $string['error:meetingnotactive'] = 'Pertemuan tidak aktif';
 $string['error:alreadyended'] = 'Pertemuan sudah berakhir';
+$string['error:rolenotfound'] = 'Peran mahasiswa tidak ditemukan dalam sistem';
 
 // Additional strings
 $string['timeremaining'] = 'Waktu tersisa';
@@ -141,11 +142,29 @@ $string['downloadcsv'] = 'Unduh CSV';
 $string['scanqrcode'] = 'Pindai Kode QR';
 $string['activemeetingfound'] = 'Pertemuan aktif ditemukan! Anda dapat memindai kode QR sekarang.';
 $string['noactivemeetings'] = 'Tidak ada pertemuan aktif saat ini.';
-$string['scannerinfo'] = 'Arahkan kamera Anda ke kode QR yang ditampilkan oleh dosen untuk menandai kehadiran Anda.';
-$string['scannerresult'] = 'Hasil scan akan muncul di sini...';
-$string['manualentry'] = 'Input Manual';
-$string['manualentryinfo'] = 'Jika scanner kamera tidak berfungsi, Anda dapat memasukkan URL kode QR secara manual:';
+$string['scannerinfo'] = 'Arahkan kamera Anda ke kode QR yang ditampilkan oleh dosen untuk mencatat kehadiran Anda.';
+$string['scannerresult'] = 'Hasil pemindaian akan muncul di sini...';
+$string['manualentry'] = 'Entri Manual';
+$string['manualentryinfo'] = 'Jika pemindai kamera tidak bekerja, Anda dapat memasukkan URL kode QR secara manual:';
 $string['invalidqrurl'] = 'URL kode QR tidak valid. Silakan periksa URL dan coba lagi.';
+
+// Manual attendance
+$string['manualattendance'] = 'Absensi Manual';
+$string['selectmeeting'] = 'Pilih Pertemuan';
+$string['selectmeetinginfo'] = 'Pilih pertemuan untuk mengelola absensi secara manual.';
+$string['manageattendance'] = 'Kelola Absensi';
+$string['manualattendancefor'] = 'Presensi untuk: {$a}';
+$string['currentstatus'] = 'Status Saat Ini';
+$string['setattendance'] = 'Atur Absensi';
+$string['saveattendance'] = 'Simpan Absensi';
+$string['attendanceupdated'] = 'Absensi diperbarui: {$a->saved} rekaman baru disimpan, {$a->updated} rekaman diperbarui.';
+$string['notset'] = 'Belum Diatur';
+$string['nostudents'] = 'Tidak ada mahasiswa yang ditemukan di kursus ini.';
+$string['back'] = 'Kembali';
+$string['managemeetings'] = 'Kelola Pertemuan';
+$string['meetingsoverview'] = 'Ringkasan Pertemuan';
+$string['bulkselection'] = 'Pilihan Massal';
+$string['bulkselectionhelp'] = 'Pilih status kehadiran di bawah ini untuk mengatur semua mahasiswa ke status tersebut sekaligus. Anda kemudian dapat memodifikasi mahasiswa individu sesuai kebutuhan.';
 
 // Events
 $string['eventcoursemoduleviewed'] = 'Modul Absensi QR dilihat';
