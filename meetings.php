@@ -210,9 +210,9 @@ class meeting_form extends moodleform {
 echo $OUTPUT->header();
 
 // Conditions to show the intro can change to look for own settings or whatever.
-if ($qratt->intro) {
-    echo $OUTPUT->box(format_module_intro('qratt', $qratt, $cm->id), 'generalbox mod_introbox', 'qrattintro');
-}
+// if ($qratt->intro) {
+//     echo $OUTPUT->box(format_module_intro('qratt', $qratt, $cm->id), 'generalbox mod_introbox', 'qrattintro');
+// }
 
 // Display navigation tabs
 $tabs = array();
