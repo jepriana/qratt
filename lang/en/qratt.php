@@ -194,6 +194,66 @@ $string['includeinstitutioninfo'] = 'Include Institution Information';
 $string['includeinstitutioninfo_desc'] = 'Include institution name, address, and contact information in generated reports';
 $string['includelogoinreports'] = 'Include Logo in Reports';
 $string['includelogoinreports_desc'] = 'Include institution logo in generated reports';
+$string['includeaddressinreports'] = 'Include Address in Reports';
+$string['includeaddressinreports_desc'] = 'Include institution address in generated reports';
+$string['includewebsiteinreports'] = 'Include Website in Reports';
+$string['includewebsiteinreports_desc'] = 'Include institution website in generated reports';
+$string['includeemailinreports'] = 'Include Email in Reports';
+$string['includeemailinreports_desc'] = 'Include institution email in generated reports';
+$string['includecityinreports'] = 'Include City in Reports';
+$string['includecityinreports_desc'] = 'Include institution city in report footers';
+
+// Institution fields
+$string['institutioncity'] = 'Institution City';
+$string['institutioncity_desc'] = 'City where the institution is located';
+$string['institutionwebsite'] = 'Institution Website';
+$string['institutionwebsite_desc'] = 'Website URL of the institution';
+$string['institutionemail'] = 'Institution Email';
+$string['institutionemail_desc'] = 'Official email address of the institution';
+
+// Course information fields
+$string['courseinformation'] = 'Course Information';
+$string['semester'] = 'Semester';
+$string['semester_help'] = 'Academic semester or term (e.g., Fall 2024, Spring 2024)';
+$string['department'] = 'Department';
+$string['department_help'] = 'Department or faculty offering this course';
+$string['studyprogram'] = 'Study Program';
+$string['studyprogram_help'] = 'Study program or major associated with this course';
+$string['subject'] = 'Subject';
+$string['subject_help'] = 'Subject or course name';
+$string['credits'] = 'Credits (SKS)';
+$string['credits_help'] = 'Number of credit hours for this course';
+$string['classname'] = 'Class';
+$string['classname_help'] = 'Class name or section (e.g., A, B, Morning, Evening)';
+$string['lecturer'] = 'Lecturer';
+$string['lecturer_help'] = 'Name of the instructor or lecturer';
+$string['dayofweek'] = 'Day of Week';
+$string['dayofweek_help'] = 'Day of the week when this class is scheduled';
+$string['scheduletime'] = 'Schedule Time';
+$string['scheduletime_help'] = 'Time when this class is scheduled (e.g., 08:00-10:00)';
+$string['room'] = 'Room';
+$string['room_help'] = 'Classroom or location where this class takes place';
+
+// Days of the week
+$string['selectday'] = 'Select day';
+$string['monday'] = 'Monday';
+$string['tuesday'] = 'Tuesday';
+$string['wednesday'] = 'Wednesday';
+$string['thursday'] = 'Thursday';
+$string['friday'] = 'Friday';
+$string['saturday'] = 'Saturday';
+$string['sunday'] = 'Sunday';
+
+// Report strings
+$string['studentreport'] = 'Student Attendance Report';
+$string['teacherreport'] = 'Teacher Report';
+$string['no'] = 'No.';
+$string['nim'] = 'Student ID';
+$string['fullname'] = 'Full Name';
+$string['numberpresent'] = 'Number Present';
+$string['numberabsent'] = 'Number Absent';
+$string['print'] = 'Print';
+$string['lecturer_in_charge'] = 'Lecturer in Charge';
 
 // Events
 $string['eventcoursemoduleviewed'] = 'QR Attendance module viewed';

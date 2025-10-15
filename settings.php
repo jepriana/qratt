@@ -67,12 +67,30 @@ if ($ADMIN->fulltree) {
         new lang_string('institutionfax_desc', 'mod_qratt'),
         '', PARAM_TEXT));
 
+    // Institution City
+    $settings->add(new admin_setting_configtext('mod_qratt/institutioncity',
+        new lang_string('institutioncity', 'mod_qratt'),
+        new lang_string('institutioncity_desc', 'mod_qratt'),
+        '', PARAM_TEXT));
+
+    // Institution Website
+    $settings->add(new admin_setting_configtext('mod_qratt/institutionwebsite',
+        new lang_string('institutionwebsite', 'mod_qratt'),
+        new lang_string('institutionwebsite_desc', 'mod_qratt'),
+        '', PARAM_URL));
+
+    // Institution Email
+    $settings->add(new admin_setting_configtext('mod_qratt/institutionemail',
+        new lang_string('institutionemail', 'mod_qratt'),
+        new lang_string('institutionemail_desc', 'mod_qratt'),
+        '', PARAM_EMAIL));
+
     // Institution Logo
     $settings->add(new admin_setting_configstoredfile('mod_qratt/institutionlogo',
         new lang_string('institutionlogo', 'mod_qratt'),
         new lang_string('institutionlogo_desc', 'mod_qratt'),
         'institutionlogo', 0,
-        array('maxfiles' => 1, 'accepted_types' => array('.png', '.jpg', '.jpeg', '.gif'))));
+        array('maxfiles' => 1, 'accepted_types' => array('.png', '.jpg', '.jpeg', '.gif')));
 
     // Report settings section
     $settings->add(new admin_setting_heading('qratt_report_settings',
@@ -89,6 +107,30 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('mod_qratt/includelogoinreports',
         new lang_string('includelogoinreports', 'mod_qratt'),
         new lang_string('includelogoinreports_desc', 'mod_qratt'),
+        1));
+
+    // Include address in reports
+    $settings->add(new admin_setting_configcheckbox('mod_qratt/includeaddressinreports',
+        new lang_string('includeaddressinreports', 'mod_qratt'),
+        new lang_string('includeaddressinreports_desc', 'mod_qratt'),
+        1));
+
+    // Include website in reports
+    $settings->add(new admin_setting_configcheckbox('mod_qratt/includewebsiteinreports',
+        new lang_string('includewebsiteinreports', 'mod_qratt'),
+        new lang_string('includewebsiteinreports_desc', 'mod_qratt'),
+        1));
+
+    // Include email in reports
+    $settings->add(new admin_setting_configcheckbox('mod_qratt/includeemailinreports',
+        new lang_string('includeemailinreports', 'mod_qratt'),
+        new lang_string('includeemailinreports_desc', 'mod_qratt'),
+        1));
+
+    // Include city in reports
+    $settings->add(new admin_setting_configcheckbox('mod_qratt/includecityinreports',
+        new lang_string('includecityinreports', 'mod_qratt'),
+        new lang_string('includecityinreports_desc', 'mod_qratt'),
         1));
 
     $ADMIN->add('modsettings', $settings);

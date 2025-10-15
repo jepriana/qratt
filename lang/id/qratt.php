@@ -194,6 +194,66 @@ $string['includeinstitutioninfo'] = 'Sertakan Informasi Institusi';
 $string['includeinstitutioninfo_desc'] = 'Sertakan nama institusi, alamat, dan informasi kontak dalam laporan yang dibuat';
 $string['includelogoinreports'] = 'Sertakan Logo dalam Laporan';
 $string['includelogoinreports_desc'] = 'Sertakan logo institusi dalam laporan yang dibuat';
+$string['includeaddressinreports'] = 'Sertakan Alamat dalam Laporan';
+$string['includeaddressinreports_desc'] = 'Sertakan alamat institusi dalam laporan yang dibuat';
+$string['includewebsiteinreports'] = 'Sertakan Website dalam Laporan';
+$string['includewebsiteinreports_desc'] = 'Sertakan website institusi dalam laporan yang dibuat';
+$string['includeemailinreports'] = 'Sertakan Email dalam Laporan';
+$string['includeemailinreports_desc'] = 'Sertakan email institusi dalam laporan yang dibuat';
+$string['includecityinreports'] = 'Sertakan Kota dalam Laporan';
+$string['includecityinreports_desc'] = 'Sertakan kota institusi dalam footer laporan';
+
+// Institution fields
+$string['institutioncity'] = 'Kota Institusi';
+$string['institutioncity_desc'] = 'Kota tempat institusi berada';
+$string['institutionwebsite'] = 'Website Institusi';
+$string['institutionwebsite_desc'] = 'URL website institusi';
+$string['institutionemail'] = 'Email Institusi';
+$string['institutionemail_desc'] = 'Alamat email resmi institusi';
+
+// Course information fields
+$string['courseinformation'] = 'Informasi Mata Kuliah';
+$string['semester'] = 'Semester';
+$string['semester_help'] = 'Semester atau periode akademik (misalnya: Genap 2024, Ganjil 2024)';
+$string['department'] = 'Jurusan';
+$string['department_help'] = 'Jurusan atau fakultas yang menawarkan mata kuliah ini';
+$string['studyprogram'] = 'Program Studi';
+$string['studyprogram_help'] = 'Program studi atau jurusan yang terkait dengan mata kuliah ini';
+$string['subject'] = 'Mata Kuliah';
+$string['subject_help'] = 'Nama mata kuliah';
+$string['credits'] = 'SKS';
+$string['credits_help'] = 'Jumlah satuan kredit semester untuk mata kuliah ini';
+$string['classname'] = 'Kelas';
+$string['classname_help'] = 'Nama kelas atau seksi (misalnya: A, B, Pagi, Sore)';
+$string['lecturer'] = 'Dosen';
+$string['lecturer_help'] = 'Nama dosen pengampu';
+$string['dayofweek'] = 'Hari';
+$string['dayofweek_help'] = 'Hari dalam seminggu ketika kelas ini dijadwalkan';
+$string['scheduletime'] = 'Pukul';
+$string['scheduletime_help'] = 'Waktu ketika kelas ini dijadwalkan (misalnya: 08:00-10:00)';
+$string['room'] = 'Ruang';
+$string['room_help'] = 'Ruang kelas atau lokasi tempat kelas ini berlangsung';
+
+// Days of the week
+$string['selectday'] = 'Pilih hari';
+$string['monday'] = 'Senin';
+$string['tuesday'] = 'Selasa';
+$string['wednesday'] = 'Rabu';
+$string['thursday'] = 'Kamis';
+$string['friday'] = 'Jumat';
+$string['saturday'] = 'Sabtu';
+$string['sunday'] = 'Minggu';
+
+// Report strings
+$string['studentreport'] = 'Laporan Kehadiran Mahasiswa';
+$string['teacherreport'] = 'Laporan Dosen';
+$string['no'] = 'No.';
+$string['nim'] = 'NIM';
+$string['fullname'] = 'Nama Lengkap';
+$string['numberpresent'] = 'Jumlah Hadir';
+$string['numberabsent'] = 'Jumlah Tidak Hadir';
+$string['print'] = 'Cetak';
+$string['lecturer_in_charge'] = 'Dosen yang Bersangkutan';
 
 // Events
 $string['eventcoursemoduleviewed'] = 'Modul Absensi QR dilihat';
