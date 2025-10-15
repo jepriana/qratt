@@ -139,6 +139,7 @@ $string['totalpresent'] = 'Total hadir';
 $string['totalabsent'] = 'Total tidak hadir';
 $string['percentage'] = 'Persentase';
 $string['downloadcsv'] = 'Unduh CSV';
+$string['reportdate'] = 'Tanggal Laporan';
 
 // Scanner functionality
 $string['scanqrcode'] = 'Pindai Kode QR';
@@ -167,6 +168,32 @@ $string['managemeetings'] = 'Kelola Pertemuan';
 $string['meetingsoverview'] = 'Ringkasan Pertemuan';
 $string['bulkselection'] = 'Pilihan Massal';
 $string['bulkselectionhelp'] = 'Pilih status kehadiran di bawah ini untuk mengatur semua mahasiswa ke status tersebut sekaligus. Anda kemudian dapat memodifikasi mahasiswa individu sesuai kebutuhan.';
+
+// Admin Settings
+$string['securitysettings'] = 'Pengaturan Keamanan';
+$string['securitysettings_desc'] = 'Konfigurasi pengaturan keamanan untuk pembuatan dan validasi kode QR.';
+$string['encryptionkey'] = 'Kunci Enkripsi Kode QR';
+$string['encryptionkey_desc'] = 'Kunci enkripsi yang digunakan untuk pembuatan dan validasi token kode QR. Kosongkan untuk menggunakan kunci sistem default. Mengubah kunci ini akan membuat kode QR yang ada tidak valid.';
+
+$string['institutionsettings'] = 'Informasi Institusi';
+$string['institutionsettings_desc'] = 'Konfigurasi informasi institusi yang akan disertakan dalam laporan absensi.';
+$string['institutionname'] = 'Nama Institusi';
+$string['institutionname_desc'] = 'Nama institusi pendidikan';
+$string['institutionaddress'] = 'Alamat Institusi';
+$string['institutionaddress_desc'] = 'Alamat lengkap institusi';
+$string['institutionphone'] = 'Telepon Institusi';
+$string['institutionphone_desc'] = 'Nomor telepon institusi';
+$string['institutionfax'] = 'Fax Institusi';
+$string['institutionfax_desc'] = 'Nomor fax institusi';
+$string['institutionlogo'] = 'Logo Institusi';
+$string['institutionlogo_desc'] = 'Upload logo institusi untuk digunakan dalam laporan. Format yang didukung: PNG, JPG, JPEG, GIF';
+
+$string['reportsettings'] = 'Pengaturan Laporan';
+$string['reportsettings_desc'] = 'Konfigurasi informasi apa yang akan disertakan dalam laporan absensi.';
+$string['includeinstitutioninfo'] = 'Sertakan Informasi Institusi';
+$string['includeinstitutioninfo_desc'] = 'Sertakan nama institusi, alamat, dan informasi kontak dalam laporan yang dibuat';
+$string['includelogoinreports'] = 'Sertakan Logo dalam Laporan';
+$string['includelogoinreports_desc'] = 'Sertakan logo institusi dalam laporan yang dibuat';
 
 // Events
 $string['eventcoursemoduleviewed'] = 'Modul Absensi QR dilihat';

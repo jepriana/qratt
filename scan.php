@@ -96,8 +96,8 @@ if ($meeting->qrexpiry <= $currenttime) {
 
 // Validate token (simple validation - in production, use more secure method)
 $validtoken = false;
-// Use the same fallback salt as in the generation function
-$salt = isset($CFG->passwordsaltmain) ? $CFG->passwordsaltmain : 'qratt_default_salt';
+// Use the configured encryption key
+$salt = qratt_get_encryption_key();
 
 // Check current token and previous few tokens to account for refresh timing
 for ($i = 0; $i <= 2; $i++) {

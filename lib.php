@@ -264,8 +264,7 @@ function qratt_print_recent_mod_activity($activity, $courseid, $detail, $modname
 function qratt_generate_qr_code($meetingid, $expiry) {
     global $CFG;
     
-    // Use a fallback salt if passwordsaltmain is not available
-    $salt = isset($CFG->passwordsaltmain) ? $CFG->passwordsaltmain : 'qratt_default_salt';
+    $salt = qratt_get_encryption_key();
     $token = md5($meetingid . $expiry . $salt);
     return $CFG->wwwroot . '/mod/qratt/scan.php?token=' . $token . '&meeting=' . $meetingid;
 }
@@ -311,4 +310,85 @@ function qratt_get_user_statistics($qrattid, $userid) {
         'absent' => $absent,
         'percentage' => $totalmeetings > 0 ? round(($present / $totalmeetings) * 100, 2) : 0
     );
+}
+
+/**
+ * Get the encryption key for QR code generation
+ *
+ * @return string The encryption key
+ */
+function qratt_get_encryption_key() {
+    global $CFG;
+    
+    // Get configured encryption key
+    $configkey = get_config('mod_qratt', 'encryptionkey');
+    
+    if (!empty($configkey)) {
+        return $configkey;
+    }
+    
+    // Fall back to system salt if no custom key is configured
+    return isset($CFG->passwordsaltmain) ? $CFG->passwordsaltmain : 'qratt_default_salt';
+}
+
+/**
+ * Get institution information for reports
+ *
+ * @return stdClass Institution information object
+ */
+function qratt_get_institution_info() {
+    $info = new stdClass();
+    $info->name = get_config('mod_qratt', 'institutionname') ?: '';
+    $info->address = get_config('mod_qratt', 'institutionaddress') ?: '';
+    $info->phone = get_config('mod_qratt', 'institutionphone') ?: '';
+    $info->fax = get_config('mod_qratt', 'institutionfax') ?: '';
+    $info->includeinreports = get_config('mod_qratt', 'includeinstitutioninfo') ? true : false;
+    $info->includelogo = get_config('mod_qratt', 'includelogoinreports') ? true : false;
+    
+    return $info;
+}
+
+/**
+ * Get institution logo URL for reports
+ *
+ * @return string|null Logo URL or null if no logo configured
+ */
+function qratt_get_institution_logo_url() {
+    global $CFG;
+    
+    $fs = get_file_storage();
+    $context = context_system::instance();
+    
+    $files = $fs->get_area_files($context->id, 'mod_qratt', 'institutionlogo', 0, 'timemodified DESC', false);
+    
+    if (!empty($files)) {
+        $file = reset($files);
+        return moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $file->get_component(),
+            $file->get_filearea(),
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out();
+    }
+    
+    return null;
+}
+
+/**
+ * Serves files from the QR Attendance file areas
+ *
+ * @param stdClass $course the course object
+ * @param stdClass $cm the course module object
+ * @param stdClass $context the qratt's context
+ * @param string $filearea the name of the file area
+ * @param array $args extra arguments (itemid, path)
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool false if the file not found, just send the file otherwise and do not return anything
+ */
+function qratt_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    require_once(__DIR__ . '/pluginfile.php');
+    return qratt_serve_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
 }

@@ -139,6 +139,7 @@ $string['totalpresent'] = 'Total present';
 $string['totalabsent'] = 'Total absent';
 $string['percentage'] = 'Percentage';
 $string['downloadcsv'] = 'Download CSV';
+$string['reportdate'] = 'Report Date';
 
 // Scanner functionality
 $string['scanqrcode'] = 'Scan QR Code';
@@ -167,6 +168,32 @@ $string['managemeetings'] = 'Manage Meetings';
 $string['meetingsoverview'] = 'Meetings Overview';
 $string['bulkselection'] = 'Bulk Selection';
 $string['bulkselectionhelp'] = 'Select an attendance status below to set all students to that status at once. You can then modify individual students as needed.';
+
+// Admin Settings
+$string['securitysettings'] = 'Security Settings';
+$string['securitysettings_desc'] = 'Configure security settings for QR code generation and validation.';
+$string['encryptionkey'] = 'QR Code Encryption Key';
+$string['encryptionkey_desc'] = 'Encryption key used for QR code token generation and validation. Leave empty to use default system key. Changing this key will invalidate existing QR codes.';
+
+$string['institutionsettings'] = 'Institution Information';
+$string['institutionsettings_desc'] = 'Configure institution information to be included in attendance reports.';
+$string['institutionname'] = 'Institution Name';
+$string['institutionname_desc'] = 'Name of the educational institution';
+$string['institutionaddress'] = 'Institution Address';
+$string['institutionaddress_desc'] = 'Complete address of the institution';
+$string['institutionphone'] = 'Institution Phone';
+$string['institutionphone_desc'] = 'Phone number of the institution';
+$string['institutionfax'] = 'Institution Fax';
+$string['institutionfax_desc'] = 'Fax number of the institution';
+$string['institutionlogo'] = 'Institution Logo';
+$string['institutionlogo_desc'] = 'Upload institution logo to be used in reports. Supported formats: PNG, JPG, JPEG, GIF';
+
+$string['reportsettings'] = 'Report Settings';
+$string['reportsettings_desc'] = 'Configure what information to include in attendance reports.';
+$string['includeinstitutioninfo'] = 'Include Institution Information';
+$string['includeinstitutioninfo_desc'] = 'Include institution name, address, and contact information in generated reports';
+$string['includelogoinreports'] = 'Include Logo in Reports';
+$string['includelogoinreports_desc'] = 'Include institution logo in generated reports';
 
 // Events
 $string['eventcoursemoduleviewed'] = 'QR Attendance module viewed';
