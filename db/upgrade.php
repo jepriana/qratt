@@ -127,5 +127,25 @@ function xmldb_qratt_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2024063001, 'qratt');
     }
 
+    // Add location and activeduration fields to qratt_meetings table
+    if ($oldversion < 2024063008) {
+        $table = new xmldb_table('qratt_meetings');
+
+        // Add location field
+        $field = new xmldb_field('location', XMLDB_TYPE_TEXT, null, null, null, null, null, 'endtime');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add activeduration field with default 30 minutes (1800 seconds)
+        $field = new xmldb_field('activeduration', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1800', 'location');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Savepoint reached
+        upgrade_mod_savepoint(true, 2024063008, 'qratt');
+    }
+
     return true;
 }

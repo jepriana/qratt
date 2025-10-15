@@ -53,6 +53,7 @@ $string['deleteemeeting'] = 'Hapus pertemuan';
 $string['meetingnumber'] = 'Nomor pertemuan';
 $string['topic'] = 'Topik';
 $string['date'] = 'Tanggal';
+$string['location'] = 'Lokasi';
 $string['status'] = 'Status';
 $string['actions'] = 'Aksi';
 $string['yourstatus'] = 'Status Anda';
@@ -94,8 +95,8 @@ $string['meetingdate'] = 'Tanggal pertemuan';
 $string['exitfullscreen'] = 'Keluar Layar Penuh';
 $string['meetingtopic'] = 'Topik pertemuan';
 $string['duration'] = 'Durasi (menit)';
-$string['activeduration'] = 'Durasi aktif (menit)';
-$string['activeduration_help'] = 'Berapa lama kode QR harus tetap aktif untuk dipindai';
+$string['activeduration'] = 'Durasi aktif';
+$string['activeduration_help'] = 'Berapa lama setelah waktu mulai pertemuan mahasiswa masih dapat ditandai sebagai Hadir. Setelah durasi ini, pemindaian terlambat akan ditandai sebagai status Terlambat.';
 
 // Errors
 $string['error:meetingnotfound'] = 'Pertemuan tidak ditemukan';

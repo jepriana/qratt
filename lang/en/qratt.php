@@ -53,6 +53,7 @@ $string['deleteemeeting'] = 'Delete meeting';
 $string['meetingnumber'] = 'Meeting number';
 $string['topic'] = 'Topic';
 $string['date'] = 'Date';
+$string['location'] = 'Location';
 $string['status'] = 'Status';
 $string['actions'] = 'Actions';
 $string['yourstatus'] = 'Your status';
@@ -94,8 +95,8 @@ $string['meetingdate'] = 'Meeting date';
 $string['exitfullscreen'] = 'Exit Full Screen';
 $string['meetingtopic'] = 'Meeting topic';
 $string['duration'] = 'Duration (minutes)';
-$string['activeduration'] = 'Active duration (minutes)';
-$string['activeduration_help'] = 'How long the QR code should remain active for scanning';
+$string['activeduration'] = 'Active duration';
+$string['activeduration_help'] = 'How long after the meeting start time students can still be marked as Present. After this duration, late scans will be marked as Late status.';
 
 // Errors
 $string['error:meetingnotfound'] = 'Meeting not found';

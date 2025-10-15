@@ -166,6 +166,9 @@ class meeting_form extends moodleform {
         
         $mform->addElement('date_time_selector', 'meetingdate', get_string('meetingdate', 'qratt'));
         
+        $mform->addElement('text', 'location', get_string('location', 'qratt'), array('size' => 60));
+        $mform->setType('location', PARAM_TEXT);
+        
         $mform->addElement('duration', 'activeduration', get_string('activeduration', 'qratt'), 
                           array('defaultunit' => MINSECS, 'optional' => false));
         $mform->addHelpButton('activeduration', 'activeduration', 'qratt');
@@ -242,6 +245,8 @@ if ($action == 'add' || $action == 'edit') {
             $meeting->meetingnumber = (int)$data->meetingnumber;
             $meeting->topic = $data->topic;
             $meeting->meetingdate = $data->meetingdate;
+            $meeting->location = $data->location;
+            $meeting->activeduration = $data->activeduration;
             $meeting->timemodified = time();
             
             $DB->update_record('qratt_meetings', $meeting);
@@ -255,6 +260,8 @@ if ($action == 'add' || $action == 'edit') {
             $newmeeting->meetingnumber = (int)$data->meetingnumber;
             $newmeeting->topic = $data->topic;
             $newmeeting->meetingdate = $data->meetingdate;
+            $newmeeting->location = $data->location;
+            $newmeeting->activeduration = $data->activeduration;
             $newmeeting->status = QRATT_MEETING_INACTIVE;
             $newmeeting->timecreated = time();
             $newmeeting->timemodified = time();
@@ -275,7 +282,9 @@ if ($action == 'add' || $action == 'edit') {
             'meetingid' => $meeting->id,
             'meetingnumber' => $meeting->meetingnumber,
             'topic' => $meeting->topic,
-            'meetingdate' => $meeting->meetingdate
+            'meetingdate' => $meeting->meetingdate,
+            'location' => $meeting->location,
+            'activeduration' => $meeting->activeduration
         ));
     } else {
         $mform->set_data(array('id' => $cm->id, 'action' => 'add'));
@@ -294,7 +303,8 @@ if ($action == 'add' || $action == 'edit') {
     echo html_writer::div(
         html_writer::tag('strong', get_string('meetingnumber', 'qratt') . ': ') . $meeting->meetingnumber . html_writer::empty_tag('br') .
         html_writer::tag('strong', get_string('topic', 'qratt') . ': ') . $meeting->topic . html_writer::empty_tag('br') .
-        html_writer::tag('strong', get_string('date', 'qratt') . ': ') . userdate($meeting->meetingdate),
+        html_writer::tag('strong', get_string('date', 'qratt') . ': ') . userdate($meeting->meetingdate) . html_writer::empty_tag('br') .
+        ($meeting->location ? html_writer::tag('strong', get_string('location', 'qratt') . ': ') . $meeting->location : ''),
         'meeting-info mb-3 p-3 bg-light border-left-primary'
     );
     
@@ -699,6 +709,7 @@ if ($action == 'add' || $action == 'edit') {
             get_string('meetingnumber', 'qratt'),
             get_string('topic', 'qratt'),
             get_string('date', 'qratt'),
+            get_string('location', 'qratt'),
             get_string('status', 'qratt'),
             get_string('actions', 'qratt')
         );
@@ -767,6 +778,7 @@ if ($action == 'add' || $action == 'edit') {
                 $meeting->meetingnumber,
                 $meeting->topic,
                 userdate($meeting->meetingdate),
+                $meeting->location ?: '-',
                 html_writer::span($statustext, 'meeting-status ' . $statusclass),
                 implode(' ', $actions)
             );

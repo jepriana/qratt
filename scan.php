@@ -156,7 +156,7 @@ if ($existingattendance) {
 // Determine attendance status based on timing
 $attendancestatus = QRATT_STATUS_PRESENT;
 $meetingstart = $meeting->starttime ? $meeting->starttime : $meeting->meetingdate;
-$latethreshold = $meetingstart + 900; // 15 minutes late threshold
+$latethreshold = $meetingstart + $meeting->activeduration; // Use meeting's active duration for late threshold
 
 if ($currenttime > $latethreshold) {
     $attendancestatus = QRATT_STATUS_LATE;
@@ -198,6 +198,7 @@ echo html_writer::div(
     html_writer::tag('p', html_writer::tag('strong', get_string('meetingnumber', 'qratt') . ': ') . $meeting->meetingnumber) .
     html_writer::tag('p', html_writer::tag('strong', get_string('topic', 'qratt') . ': ') . $meeting->topic) .
     html_writer::tag('p', html_writer::tag('strong', get_string('date', 'qratt') . ': ') . userdate($meeting->meetingdate)) .
+    ($meeting->location ? html_writer::tag('p', html_writer::tag('strong', get_string('location', 'qratt') . ': ') . $meeting->location) : '') .
     html_writer::tag('p', html_writer::tag('strong', get_string('scantime', 'qratt') . ': ') . userdate($currenttime)),
     array('class' => 'meeting-details mt-4 p-3 bg-light')
 );
