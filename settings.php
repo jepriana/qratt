@@ -90,7 +90,7 @@ if ($ADMIN->fulltree) {
         new lang_string('institutionlogo', 'mod_qratt'),
         new lang_string('institutionlogo_desc', 'mod_qratt'),
         'institutionlogo', 0,
-        array('maxfiles' => 1, 'accepted_types' => array('.png', '.jpg', '.jpeg', '.gif')));
+        array('maxfiles' => 1, 'accepted_types' => array('.png', '.jpg', '.jpeg', '.gif'))));
 
     // Report settings section
     $settings->add(new admin_setting_heading('qratt_report_settings',
