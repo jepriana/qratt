@@ -97,9 +97,8 @@ if (!$studentrole) {
 }
 
 $context = context_module::instance($cm->id);
-$students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 
-                             'u.id', '', 0, '', '', '', 0, $studentrole->id);
-
+$students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id');
+$students = qratt_filter_students_only($students, $context);
 $filteredstudents = array_keys($students);
 
 // Get attendance counts for each meeting (students only)
@@ -143,8 +142,14 @@ foreach ($meetings as $meeting) {
     $teachername = '';
     if ($meeting->teacherid && isset($teachernames[$meeting->teacherid])) {
         $teachername = $teachernames[$meeting->teacherid];
+        if (debugging()) {
+            mtrace('Using meeting teacher: ' . $teachername . ' (ID: ' . $meeting->teacherid . ')');
+        }
     } else if (!empty($qratt->lecturer)) {
         $teachername = $qratt->lecturer;
+        if (debugging()) {
+            mtrace('Using activity lecturer: ' . $teachername);
+        }
     }
     
     $meetingdata[] = array(

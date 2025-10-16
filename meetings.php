@@ -266,6 +266,11 @@ if ($action == 'add' || $action == 'edit') {
             $meeting->teacherid = $data->teacherid > 0 ? $data->teacherid : null;
             $meeting->timemodified = time();
             
+            // Debug: Log the teacherid being saved
+            if (debugging()) {
+                mtrace('Updating meeting ID: ' . $meeting->id . ' with teacherid: ' . $meeting->teacherid);
+            }
+            
             $DB->update_record('qratt_meetings', $meeting);
             
             redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')), 
@@ -283,6 +288,11 @@ if ($action == 'add' || $action == 'edit') {
             $newmeeting->status = QRATT_MEETING_INACTIVE;
             $newmeeting->timecreated = time();
             $newmeeting->timemodified = time();
+            
+            // Debug: Log the teacherid being saved
+            if (debugging()) {
+                mtrace('Creating new meeting with teacherid: ' . $newmeeting->teacherid);
+            }
             
             $DB->insert_record('qratt_meetings', $newmeeting);
             
@@ -338,7 +348,10 @@ if ($action == 'add' || $action == 'edit') {
     // Get users enrolled with student role only
     $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 
                                  'u.id, u.firstname, u.lastname, u.email', 
-                                 'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
+                                 'u.lastname, u.firstname');
+    
+    // Filter to ensure only students (not teachers) are included
+    $students = qratt_filter_students_only($students, $context);
     
     if (!$students) {
         echo $OUTPUT->notification(get_string('nostudents', 'qratt'), 'notifymessage');

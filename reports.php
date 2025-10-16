@@ -86,7 +86,8 @@ if ($download == 'csv') {
     $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC');
     
     // Dapatkan hanya siswa yang terdaftar di kursus
-    $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname', 0, '', '', '', 0, $studentroleid);
+    $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname');
+    $students = qratt_filter_students_only($students, $context);
     
     // Buat header CSV
     $headers = array(get_string('firstname'), get_string('lastname'), get_string('email'));
@@ -237,7 +238,8 @@ switch ($action) {
         }
         
         // Dapatkan semua siswa sekali
-        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname', 0, '', '', '', 0, $studentroleid);
+        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname');
+        $students = qratt_filter_students_only($students, $context);
 
         foreach ($meetings as $meeting) {
             echo $OUTPUT->heading(get_string('meeting', 'qratt') . ' ' . $meeting->meetingnumber . ': ' . $meeting->topic, 3);
@@ -317,7 +319,8 @@ switch ($action) {
         echo $OUTPUT->heading(get_string('reportbystudent', 'qratt'), 2);
         
         // Dapatkan siswa yang terdaftar di kursus
-        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname', 0, '', '', '', 0, $studentroleid);
+        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id, u.firstname, u.lastname, u.email', 'u.lastname, u.firstname');
+        $students = qratt_filter_students_only($students, $context);
         
         $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC');
         
@@ -398,7 +401,8 @@ switch ($action) {
         echo $OUTPUT->heading(get_string('attendanceoverview', 'qratt'), 2);
         
         // Dapatkan siswa yang terdaftar di kursus
-        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id', 'u.lastname', 0, '', '', '', 0, $studentroleid);
+        $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 'u.id', 'u.lastname');
+        $students = qratt_filter_students_only($students, $context);
         $totalstudents = count($students);
         
         // Perbaikan: Pastikan pertemuan diurutkan di sini.

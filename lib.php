@@ -140,9 +140,31 @@ function qratt_filter_students_only($users, $context) {
         return array(); // Return empty if student role not found
     }
     
+    // Get teacher role IDs to exclude
+    $teacherroles = $DB->get_records_menu('role', 
+        array(), '', 'id, shortname');
+    $teacheroleids = array();
+    foreach ($teacherroles as $roleid => $shortname) {
+        if (in_array($shortname, array('teacher', 'editingteacher', 'manager'))) {
+            $teacheroleids[] = $roleid;
+        }
+    }
+    
     foreach ($users as $user) {
-        // Check if user has student role in this context
-        if (user_has_role_assignment($user->id, $studentrole->id, $context->id)) {
+        // Check if user has student role
+        $hasstudent = user_has_role_assignment($user->id, $studentrole->id, $context->id);
+        
+        // Check if user has teacher role
+        $hasteacher = false;
+        foreach ($teacheroleids as $teacheroleid) {
+            if (user_has_role_assignment($user->id, $teacheroleid, $context->id)) {
+                $hasteacher = true;
+                break;
+            }
+        }
+        
+        // Include only if has student role and no teacher role
+        if ($hasstudent && !$hasteacher) {
             $filteredstudents[$user->id] = $user;
         }
     }

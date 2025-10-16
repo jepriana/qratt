@@ -80,7 +80,10 @@ if (!$studentrole) {
 // Get only users with student role, including username for NIM
 $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 
                              'u.id, u.username, u.idnumber, u.firstname, u.lastname', 
-                             'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
+                             'u.lastname, u.firstname');
+
+// Filter to ensure only students (not teachers) are included
+$students = qratt_filter_students_only($students, $context);
 
 // Get meetings (up to 16 meetings)
 $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC', 'id, meetingnumber, topic, meetingdate', 0, 16);
