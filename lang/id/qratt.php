@@ -102,9 +102,10 @@ $string['activeduration_help'] = 'Berapa lama setelah waktu mulai pertemuan maha
 $string['error:meetingnotfound'] = 'Pertemuan tidak ditemukan';
 $string['error:cannotactivate'] = 'Tidak dapat mengaktifkan pertemuan';
 $string['error:meetingnotactive'] = 'Pertemuan tidak aktif';
-$string['error:alreadyended'] = 'Pertemuan sudah berakhir';
-$string['error:rolenotfound'] = 'Peran mahasiswa tidak ditemukan dalam sistem';
-$string['cannotmarkattendance'] = 'Tidak dapat menandai kehadiran. Silakan coba lagi.';
+$string['error:alreadyended'] = 'Pertemuan telah berakhir';
+$string['error:rolenotfound'] = 'Role mahasiswa tidak ditemukan di sistem';
+$string['cannotmarkattendance'] = 'Tidak dapat mencatat kehadiran. Silakan coba lagi.';
+$string['onlystudentscanattend'] = 'Hanya mahasiswa yang dapat mencatat kehadiran dengan memindai kode QR.';
 
 // Additional strings
 $string['timeremaining'] = 'Waktu tersisa';
@@ -246,9 +247,14 @@ $string['friday'] = 'Jumat';
 $string['saturday'] = 'Sabtu';
 $string['sunday'] = 'Minggu';
 
+// Meeting teacher
+$string['meetingteacher'] = 'Dosen Pertemuan';
+$string['meetingteacher_help'] = 'Pilih dosen yang akan mengajar pada pertemuan ini';
+$string['selectteacher'] = 'Pilih dosen';
+
 // Report strings
 $string['studentreport'] = 'Laporan Kehadiran Mahasiswa';
-$string['teacherreport'] = 'Laporan Dosen';
+$string['teacherreport'] = 'Laporan Kehadiran Dosen';
 $string['no'] = 'No.';
 $string['nim'] = 'NIM';
 $string['fullname'] = 'Nama Lengkap';

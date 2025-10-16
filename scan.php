@@ -67,6 +67,12 @@ if (!is_enrolled($context, $USER->id)) {
 $modulecontext = context_module::instance($cm->id);
 require_capability('mod/qratt:takeattendance', $modulecontext);
 
+// Check if user has student role (prevent teachers from being marked as attendees)
+$studentrole = $DB->get_record('role', array('shortname' => 'student'));
+if (!$studentrole || !user_has_role_assignment($USER->id, $studentrole->id, $context->id)) {
+    print_error('onlystudentscanattend', 'qratt');
+}
+
 // Setel informasi halaman Moodle
 $PAGE->set_url('/mod/qratt/scan.php', array('token' => $token, 'meeting' => $meetingid, 'id' => $cm->id));
 $PAGE->set_title(get_string('scanqr', 'qratt'));

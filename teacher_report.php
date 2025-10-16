@@ -27,6 +27,9 @@ require_once(dirname(__FILE__).'/lib.php');
 
 $id = required_param('id', PARAM_INT);
 
+// Format date as dd MMMM yyyy (Indonesian style)
+$dateformat = '%d %B %Y';
+
 $cm = get_coursemodule_from_id('qratt', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $qratt = $DB->get_record('qratt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -70,8 +73,21 @@ $includecityinreports = get_config('mod_qratt', 'includecityinreports');
 $includephoneinreports = get_config('mod_qratt', 'includephoneinreports');
 $includefaxinreports = get_config('mod_qratt', 'includefaxinreports');
 
-// Get meetings
+// Get meetings with teacher information
 $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC');
+
+// Get teacher names for meetings
+$teachernames = array();
+if (!empty($meetings)) {
+    $teacherids = array_filter(array_map(function($m) { return $m->teacherid; }, $meetings));
+    if (!empty($teacherids)) {
+        list($insql, $params) = $DB->get_in_or_equal($teacherids);
+        $teachers = $DB->get_records_sql("SELECT id, firstname, lastname FROM {user} WHERE id $insql", $params);
+        foreach ($teachers as $teacher) {
+            $teachernames[$teacher->id] = fullname($teacher);
+        }
+    }
+}
 
 // Get attendance counts for each meeting
 $meetingdata = array();
@@ -105,11 +121,18 @@ foreach ($meetings as $meeting) {
         }
     }
     
+    $teachername = '';
+    if ($meeting->teacherid && isset($teachernames[$meeting->teacherid])) {
+        $teachername = $teachernames[$meeting->teacherid];
+    } else if (!empty($qratt->lecturer)) {
+        $teachername = $qratt->lecturer;
+    }
+    
     $meetingdata[] = array(
         'number' => $meeting->meetingnumber,
         'date' => $meeting->meetingdate,
         'topic' => $meeting->topic,
-        'lecturer' => $qratt->lecturer,
+        'lecturer' => $teachername,
         'present' => $present + $late, // Include late as present
         'absent' => $absent
     );
@@ -166,7 +189,7 @@ header('Content-Type: text/html; charset=utf-8');
             display: table;
             width: 100%;
             margin-bottom: 20px;
-            border: 1px solid #000;
+            border: 0px solid #000;
         }
         .course-info-left, .course-info-right {
             display: table-cell;
@@ -175,7 +198,7 @@ header('Content-Type: text/html; charset=utf-8');
             vertical-align: top;
         }
         .course-info-right {
-            border-left: 1px solid #000;
+            border-left: 0px solid #000;
         }
         .info-row {
             margin-bottom: 3px;
@@ -203,7 +226,7 @@ header('Content-Type: text/html; charset=utf-8');
             text-align: left;
         }
         .footer {
-            margin-top: 40px;
+            margin-top: 16px;
             text-align: right;
         }
         .footer-signature {
@@ -257,36 +280,41 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
     </div>
 
+    <!-- Report Title -->
+    <div style="text-align: center; margin: 4px 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+        <?php echo get_string('teacherreport', 'qratt'); ?>
+    </div>
+
     <!-- Course Information -->
     <div class="course-info">
         <div class="course-info-left">
             <?php if (!empty($qratt->semester)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('semester', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('semester', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->semester); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->department)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('department', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('department', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->department); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->studyprogram)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('studyprogram', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('studyprogram', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->studyprogram); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->subject)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('subject', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('subject', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->subject); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->credits)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('credits', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('credits', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->credits); ?>
             </div>
             <?php endif; ?>
@@ -294,31 +322,31 @@ header('Content-Type: text/html; charset=utf-8');
         <div class="course-info-right">
             <?php if (!empty($qratt->classname)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('classname', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('classname', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->classname); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->lecturer)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('lecturer', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('lecturer', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->lecturer); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->dayofweek)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('dayofweek', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('dayofweek', 'qratt'); ?></span>
                 <?php echo get_string($qratt->dayofweek, 'qratt'); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->scheduletime)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('scheduletime', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('scheduletime', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->scheduletime); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($qratt->room)): ?>
             <div class="info-row">
-                <span class="info-label"><?php echo get_string('room', 'qratt'); ?>:</span>
+                <span class="info-label"><?php echo get_string('room', 'qratt'); ?></span>
                 <?php echo htmlspecialchars($qratt->room); ?>
             </div>
             <?php endif; ?>
@@ -342,7 +370,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <?php foreach ($meetingdata as $data): ?>
                     <tr>
                         <td><?php echo $data['number']; ?></td>
-                        <td><?php echo userdate($data['date'], get_string('strftimedatefullshort')); ?></td>
+                        <td><?php echo userdate($data['date'], $dateformat); ?></td>
                         <td><?php echo htmlspecialchars($data['lecturer'] ?: '-'); ?></td>
                         <td class="topic-column"><?php echo htmlspecialchars($data['topic']); ?></td>
                         <td><?php echo $data['present']; ?></td>
@@ -360,15 +388,14 @@ header('Content-Type: text/html; charset=utf-8');
     <!-- Footer -->
     <div class="footer">
         <?php 
-        // Format date as dd MMMM yyyy (Indonesian style)
-        $dateformat = '%d %B %Y';
         if ($includecityinreports && !empty($institutioncity)): ?>
             <?php echo htmlspecialchars($institutioncity) . ', ' . userdate(time(), $dateformat); ?>
         <?php else: ?>
             <?php echo userdate(time(), $dateformat); ?>
         <?php endif; ?>
+        <br>
+        <?php echo get_string('lecturer_in_charge', 'qratt'); ?><br><br>
         <div class="footer-signature">
-            <?php echo get_string('lecturer_in_charge', 'qratt'); ?><br><br><br>
             <?php if (!empty($qratt->lecturer)): ?>
                 <?php echo htmlspecialchars($qratt->lecturer); ?>
             <?php else: ?>

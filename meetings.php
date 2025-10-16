@@ -174,6 +174,17 @@ class meeting_form extends moodleform {
         $mform->addHelpButton('activeduration', 'activeduration', 'qratt');
         $mform->setDefault('activeduration', 1800); // 30 minutes default
         
+        // Teacher selection
+        global $DB;
+        $context = context_course::instance($this->_customdata['qratt']->course);
+        $teachers = get_enrolled_users($context, 'mod/qratt:manage', 0, 'u.id, u.firstname, u.lastname', 'u.lastname, u.firstname');
+        $teacheroptions = array(0 => get_string('selectteacher', 'qratt'));
+        foreach ($teachers as $teacher) {
+            $teacheroptions[$teacher->id] = fullname($teacher);
+        }
+        $mform->addElement('select', 'teacherid', get_string('meetingteacher', 'qratt'), $teacheroptions);
+        $mform->addHelpButton('teacherid', 'meetingteacher', 'qratt');
+        
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         
@@ -247,6 +258,7 @@ if ($action == 'add' || $action == 'edit') {
             $meeting->meetingdate = $data->meetingdate;
             $meeting->location = $data->location;
             $meeting->activeduration = $data->activeduration;
+            $meeting->teacherid = $data->teacherid > 0 ? $data->teacherid : null;
             $meeting->timemodified = time();
             
             $DB->update_record('qratt_meetings', $meeting);
@@ -262,6 +274,7 @@ if ($action == 'add' || $action == 'edit') {
             $newmeeting->meetingdate = $data->meetingdate;
             $newmeeting->location = $data->location;
             $newmeeting->activeduration = $data->activeduration;
+            $newmeeting->teacherid = $data->teacherid > 0 ? $data->teacherid : null;
             $newmeeting->status = QRATT_MEETING_INACTIVE;
             $newmeeting->timecreated = time();
             $newmeeting->timemodified = time();
@@ -284,7 +297,8 @@ if ($action == 'add' || $action == 'edit') {
             'topic' => $meeting->topic,
             'meetingdate' => $meeting->meetingdate,
             'location' => $meeting->location,
-            'activeduration' => $meeting->activeduration
+            'activeduration' => $meeting->activeduration,
+            'teacherid' => $meeting->teacherid
         ));
     } else {
         $mform->set_data(array('id' => $cm->id, 'action' => 'add'));

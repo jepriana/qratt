@@ -215,5 +215,25 @@ function xmldb_qratt_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2024063010, 'qratt');
     }
 
+    // Add teacherid field to qratt_meetings table
+    if ($oldversion < 2024063011) {
+        $table = new xmldb_table('qratt_meetings');
+
+        // Add teacherid field
+        $field = new xmldb_field('teacherid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'activeduration');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add foreign key for teacherid
+        $key = new xmldb_key('teacherid', XMLDB_KEY_FOREIGN, array('teacherid'), 'user', array('id'));
+        if (!$dbman->key_exists($table, $key)) {
+            $dbman->add_key($table, $key);
+        }
+
+        // Savepoint reached
+        upgrade_mod_savepoint(true, 2024063011, 'qratt');
+    }
+
     return true;
 }

@@ -105,6 +105,7 @@ $string['error:meetingnotactive'] = 'Meeting is not active';
 $string['error:alreadyended'] = 'Meeting has already ended';
 $string['error:rolenotfound'] = 'Student role not found in the system';
 $string['cannotmarkattendance'] = 'Cannot mark attendance. Please try again.';
+$string['onlystudentscanattend'] = 'Only students can mark attendance by scanning QR codes.';
 
 // Additional strings
 $string['timeremaining'] = 'Time remaining';
@@ -246,9 +247,14 @@ $string['friday'] = 'Friday';
 $string['saturday'] = 'Saturday';
 $string['sunday'] = 'Sunday';
 
+// Meeting teacher
+$string['meetingteacher'] = 'Meeting Teacher';
+$string['meetingteacher_help'] = 'Select the teacher who will be conducting this meeting';
+$string['selectteacher'] = 'Select teacher';
+
 // Report strings
 $string['studentreport'] = 'Student Attendance Report';
-$string['teacherreport'] = 'Teacher Report';
+$string['teacherreport'] = 'Lecture Attendance Report';
 $string['no'] = 'No.';
 $string['nim'] = 'Student ID';
 $string['fullname'] = 'Full Name';
