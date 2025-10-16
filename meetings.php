@@ -818,25 +818,27 @@ if ($action == 'add' || $action == 'edit') {
         
         echo html_writer::table($table);
         
-        // Add meeting button and report buttons
+        // Add meeting button and report buttons in horizontal layout
         echo html_writer::div(
-            $OUTPUT->single_button(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'add')), 
-                                 get_string('addmeeting', 'qratt'), 'get') .
-            html_writer::div('', 'mt-2') .
-            html_writer::tag('div',
+            html_writer::div(
+                html_writer::link(
+                    new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'add')),
+                    get_string('addmeeting', 'qratt'),
+                    array('class' => 'btn btn-primary mr-3')
+                ) .
                 html_writer::link(
                     new moodle_url('/mod/qratt/student_report.php', array('id' => $cm->id)),
                     get_string('studentreport', 'qratt'),
-                    array('class' => 'btn btn-success btn-lg mr-2', 'target' => '_blank')
+                    array('class' => 'btn btn-secondary mr-3', 'target' => '_blank')
                 ) .
                 html_writer::link(
                     new moodle_url('/mod/qratt/teacher_report.php', array('id' => $cm->id)),
                     get_string('teacherreport', 'qratt'),
-                    array('class' => 'btn btn-info btn-lg', 'target' => '_blank')
+                    array('class' => 'btn btn-secondary', 'target' => '_blank')
                 ),
-                array('class' => 'report-buttons mt-2')
+                'button-group d-flex flex-wrap align-items-center'
             ),
-            'add-meeting-button mt-3'
+            'action-buttons mt-3'
         );
     }
 }

@@ -27,6 +27,9 @@ require_once(dirname(__FILE__).'/lib.php');
 
 $id = required_param('id', PARAM_INT);
 
+// Format date as dd MMMM yyyy (Indonesian style)
+$dateformat = '%d %B %Y';
+
 $cm = get_coursemodule_from_id('qratt', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $qratt = $DB->get_record('qratt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -131,23 +134,26 @@ header('Content-Type: text/html; charset=utf-8');
             font-size: 12px;
         }
         .report-header {
-            display: table;
+            position: relative;
             width: 100%;
-            margin-bottom: 30px;
+            margin-bottom: 8px;
+            text-align: center;
         }
         .logo-section {
-            display: table-cell;
+            position: absolute;
+            left: 0;
+            top: 0;
             width: 120px;
-            vertical-align: top;
         }
         .logo-section img {
             max-width: 100px;
             max-height: 100px;
         }
         .institution-info {
-            display: table-cell;
-            vertical-align: top;
-            padding-left: 20px;
+            margin: 0 auto;
+            text-align: center;
+            width: 100%;
+            padding: 0;
         }
         .institution-name {
             font-size: 18px;
@@ -191,6 +197,7 @@ header('Content-Type: text/html; charset=utf-8');
             padding: 5px;
             text-align: center;
             font-size: 10px;
+            box-sizing: border-box;
         }
         .attendance-table th {
             background-color: #f0f0f0;
@@ -211,7 +218,7 @@ header('Content-Type: text/html; charset=utf-8');
             font-size: 11px;
         }
         .footer {
-            margin-top: 40px;
+            margin-top: 16px;
             text-align: right;
         }
         .footer-signature {
@@ -269,8 +276,11 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
     </div>
 
+    <!-- Separator Line -->
+    <hr style="border: 1px solid #000; margin: 20px 0;">
+    
     <!-- Report Title -->
-    <div style="text-align: center; margin: 4px 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+    <div style="text-align: center; margin: 20px 0; font-size: 16px; font-weight: bold; text-transform: uppercase; text-decoration: underline;">
         <?php echo get_string('studentreport', 'qratt'); ?>
     </div>
 
@@ -422,8 +432,6 @@ header('Content-Type: text/html; charset=utf-8');
     <!-- Footer -->
     <div class="footer">
         <?php 
-        // Format date as dd MMMM yyyy (Indonesian style)
-        $dateformat = '%d %B %Y';
         if ($includecityinreports && !empty($institutioncity)): ?>
             <?php echo htmlspecialchars($institutioncity) . ', ' . userdate(time(), $dateformat); ?>
         <?php else: ?>

@@ -182,23 +182,26 @@ header('Content-Type: text/html; charset=utf-8');
             font-size: 12px;
         }
         .report-header {
-            display: table;
+            position: relative;
             width: 100%;
-            margin-bottom: 30px;
+            margin-bottom: 8px;
+            text-align: center;
         }
         .logo-section {
-            display: table-cell;
+            position: absolute;
+            left: 0;
+            top: 0;
             width: 120px;
-            vertical-align: top;
         }
         .logo-section img {
             max-width: 100px;
             max-height: 100px;
         }
         .institution-info {
-            display: table-cell;
-            vertical-align: top;
-            padding-left: 20px;
+            margin: 0 auto;
+            text-align: center;
+            width: 100%;
+            padding: 0;
         }
         .institution-name {
             font-size: 18px;
@@ -241,12 +244,35 @@ header('Content-Type: text/html; charset=utf-8');
             border: 1px solid #000;
             padding: 8px;
             text-align: center;
+            box-sizing: border-box;
         }
         .meetings-table th {
             background-color: #f0f0f0;
             font-weight: bold;
         }
         .meetings-table td.topic-column {
+            text-align: left;
+        }
+        .meetings-table .col-meeting-num {
+            width: 8%;
+        }
+        .meetings-table .col-date {
+            width: 20%;
+        }
+        .meetings-table .col-lecturer {
+            width: 20%;
+        }
+        .meetings-table .col-topic {
+            width: 32%;
+        }
+        .meetings-table .col-present {
+            width: 10%;
+        }
+        .meetings-table .col-absent {
+            width: 10%;
+        }
+        .meetings-table .col-date-content,
+        .meetings-table .col-lecturer-content {
             text-align: left;
         }
         .footer {
@@ -304,8 +330,11 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
     </div>
 
+    <!-- Separator Line -->
+    <hr style="border: 1px solid #000; margin: 20px 0;">
+    
     <!-- Report Title -->
-    <div style="text-align: center; margin: 4px 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">
+    <div style="text-align: center; margin: 20px 0; font-size: 16px; font-weight: bold; text-transform: uppercase; text-decoration: underline;">
         <?php echo get_string('teacherreport', 'qratt'); ?>
     </div>
 
@@ -381,24 +410,24 @@ header('Content-Type: text/html; charset=utf-8');
     <table class="meetings-table">
         <thead>
             <tr>
-                <th><?php echo get_string('meetingnumber', 'qratt'); ?></th>
-                <th><?php echo get_string('date', 'qratt'); ?></th>
-                <th><?php echo get_string('lecturer', 'qratt'); ?></th>
-                <th><?php echo get_string('topic', 'qratt'); ?></th>
-                <th><?php echo get_string('numberpresent', 'qratt'); ?></th>
-                <th><?php echo get_string('numberabsent', 'qratt'); ?></th>
+                <th class="col-meeting-num"><?php echo get_string('meetingnumber', 'qratt'); ?></th>
+                <th class="col-date"><?php echo get_string('date', 'qratt'); ?></th>
+                <th class="col-lecturer"><?php echo get_string('lecturer', 'qratt'); ?></th>
+                <th class="col-topic"><?php echo get_string('topic', 'qratt'); ?></th>
+                <th class="col-present"><?php echo get_string('numberpresent', 'qratt'); ?></th>
+                <th class="col-absent"><?php echo get_string('numberabsent', 'qratt'); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php if (!empty($meetingdata)): ?>
                 <?php foreach ($meetingdata as $data): ?>
                     <tr>
-                        <td><?php echo $data['number']; ?></td>
-                        <td><?php echo userdate($data['date'], $dateformat); ?></td>
-                        <td><?php echo htmlspecialchars($data['lecturer'] ?: '-'); ?></td>
-                        <td class="topic-column"><?php echo htmlspecialchars($data['topic']); ?></td>
-                        <td><?php echo $data['present']; ?></td>
-                        <td><?php echo $data['absent']; ?></td>
+                        <td class="col-meeting-num"><?php echo $data['number']; ?></td>
+                        <td class="col-date col-date-content"><?php echo userdate($data['date'], $dateformat); ?></td>
+                        <td class="col-lecturer col-lecturer-content"><?php echo htmlspecialchars($data['lecturer'] ?: '-'); ?></td>
+                        <td class="col-topic topic-column"><?php echo htmlspecialchars($data['topic']); ?></td>
+                        <td class="col-present"><?php echo $data['present']; ?></td>
+                        <td class="col-absent"><?php echo $data['absent']; ?></td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
