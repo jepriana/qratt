@@ -69,7 +69,12 @@ require_capability('mod/qratt:takeattendance', $modulecontext);
 
 // Check if user has student role (prevent teachers from being marked as attendees)
 $studentrole = $DB->get_record('role', array('shortname' => 'student'));
-if (!$studentrole || !user_has_role_assignment($USER->id, $studentrole->id, $context->id)) {
+if (!$studentrole) {
+    print_error('error:rolenotfound', 'qratt');
+}
+
+// Check if user is enrolled as a student in this course
+if (!user_has_role_assignment($USER->id, $studentrole->id, $context->id)) {
     print_error('onlystudentscanattend', 'qratt');
 }
 

@@ -216,7 +216,7 @@ function xmldb_qratt_upgrade($oldversion) {
     }
 
     // Add teacherid field to qratt_meetings table
-    if ($oldversion < 2024063011) {
+    if ($oldversion < 2025101602) {
         $table = new xmldb_table('qratt_meetings');
 
         // Add teacherid field
@@ -232,7 +232,7 @@ function xmldb_qratt_upgrade($oldversion) {
         }
 
         // Savepoint reached
-        upgrade_mod_savepoint(true, 2024063011, 'qratt');
+        upgrade_mod_savepoint(true, 2025101602, 'qratt');
     }
 
     return true;

@@ -82,45 +82,29 @@ $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0,
                              'u.id, u.username, u.idnumber, u.firstname, u.lastname', 
                              'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
 
-// Filter out any teachers who might still appear due to multiple role assignments
-$filteredstudents = array();
-foreach ($students as $student) {
-    // Double-check: ensure user has student role and is not a teacher
-    $userroles = get_user_roles($context, $student->id, false);
-    $isstudent = false;
-    $isteacher = false;
-    
-    foreach ($userroles as $role) {
-        if ($role->shortname == 'student') {
-            $isstudent = true;
-        }
-        if (in_array($role->shortname, array('teacher', 'editingteacher', 'manager'))) {
-            $isteacher = true;
-        }
-    }
-    
-    // Only include if they have student role and are not a teacher
-    if ($isstudent && !$isteacher) {
-        $filteredstudents[$student->id] = $student;
-    }
-}
-$students = $filteredstudents;
-
 // Get meetings (up to 16 meetings)
 $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC', 'id, meetingnumber, topic, meetingdate', 0, 16);
 
-// Get all attendance records for this activity
+// Get all attendance records for this activity (students only)
 $attendancerecords = array();
-if (!empty($meetings)) {
+if (!empty($meetings) && !empty($students)) {
     $meetingids = array_keys($meetings);
-    list($insql, $params) = $DB->get_in_or_equal($meetingids);
-    $attendances = $DB->get_records_sql("SELECT a.*, m.meetingnumber 
-                                        FROM {qratt_attendance} a 
-                                        JOIN {qratt_meetings} m ON a.meetingid = m.id 
-                                        WHERE a.meetingid $insql", $params);
+    $studentids = array_keys($students);
     
-    foreach ($attendances as $attendance) {
-        $attendancerecords[$attendance->userid][$attendance->meetingnumber] = $attendance->status;
+    if (!empty($meetingids) && !empty($studentids)) {
+        list($meetinginsql, $meetingparams) = $DB->get_in_or_equal($meetingids);
+        list($studentinsql, $studentparams) = $DB->get_in_or_equal($studentids);
+        $params = array_merge($meetingparams, $studentparams);
+        
+        $attendances = $DB->get_records_sql("SELECT a.*, m.meetingnumber 
+                                            FROM {qratt_attendance} a 
+                                            JOIN {qratt_meetings} m ON a.meetingid = m.id 
+                                            WHERE a.meetingid $meetinginsql 
+                                            AND a.userid $studentinsql", $params);
+        
+        foreach ($attendances as $attendance) {
+            $attendancerecords[$attendance->userid][$attendance->meetingnumber] = $attendance->status;
+        }
     }
 }
 
@@ -376,7 +360,14 @@ header('Content-Type: text/html; charset=utf-8');
                 <?php foreach ($students as $student): ?>
                     <tr>
                         <td><?php echo $no++; ?></td>
-                        <td><?php echo htmlspecialchars($student->idnumber); ?></td>
+                        <td><?php 
+                            // Use username as NIM, remove @ and everything after if present
+                            $nim = $student->username;
+                            if (strpos($nim, '@') !== false) {
+                                $nim = substr($nim, 0, strpos($nim, '@'));
+                            }
+                            echo htmlspecialchars($nim); 
+                        ?></td>
                         <td class="name-column"><?php echo htmlspecialchars($student->firstname . ' ' . $student->lastname); ?></td>
                         <?php for ($meetingnum = 1; $meetingnum <= 16; $meetingnum++): ?>
                             <td class="meeting-column">

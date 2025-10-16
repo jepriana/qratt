@@ -124,6 +124,33 @@ function qratt_delete_instance($id) {
 }
 
 /**
+ * Filter users to ensure only students (not teachers) are included
+ *
+ * @param array $users Array of user objects
+ * @param context $context Context to check roles in
+ * @return array Filtered array containing only students
+ */
+function qratt_filter_students_only($users, $context) {
+    global $DB;
+    
+    $filteredstudents = array();
+    $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+    
+    if (!$studentrole) {
+        return array(); // Return empty if student role not found
+    }
+    
+    foreach ($users as $user) {
+        // Check if user has student role in this context
+        if (user_has_role_assignment($user->id, $studentrole->id, $context->id)) {
+            $filteredstudents[$user->id] = $user;
+        }
+    }
+    
+    return $filteredstudents;
+}
+
+/**
  * Returns the information on whether the module supports a feature
  *
  * @see plugin_supports() in lib/moodlelib.php

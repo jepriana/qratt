@@ -89,15 +89,34 @@ if (!empty($meetings)) {
     }
 }
 
-// Get attendance counts for each meeting
+// Get students only (filter out teachers)
+$studentrole = $DB->get_record('role', array('shortname' => 'student'));
+if (!$studentrole) {
+    echo $OUTPUT->notification(get_string('error:rolenotfound', 'qratt'), 'notifyproblem');
+    exit;
+}
+
+$context = context_module::instance($cm->id);
+$students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 
+                             'u.id', '', 0, '', '', '', 0, $studentrole->id);
+
+$filteredstudents = array_keys($students);
+
+// Get attendance counts for each meeting (students only)
 $meetingdata = array();
 foreach ($meetings as $meeting) {
-    // Get attendance counts
-    $attendancecounts = $DB->get_records_sql("
-        SELECT status, COUNT(*) as count 
-        FROM {qratt_attendance} 
-        WHERE meetingid = ? 
-        GROUP BY status", array($meeting->id));
+    // Get attendance counts for students only
+    if (!empty($filteredstudents)) {
+        list($insql, $params) = $DB->get_in_or_equal($filteredstudents);
+        $params[] = $meeting->id;
+        $attendancecounts = $DB->get_records_sql("
+            SELECT status, COUNT(*) as count 
+            FROM {qratt_attendance} 
+            WHERE userid $insql AND meetingid = ?
+            GROUP BY status", $params);
+    } else {
+        $attendancecounts = array();
+    }
     
     $present = 0;
     $late = 0;

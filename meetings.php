@@ -207,12 +207,17 @@ class meeting_form extends moodleform {
         $meeting = $this->_customdata['meeting'];
         
         // Check if meeting number already exists (for new meetings or when changing meeting number)
-        $conditions = array('qrattid' => $qratt->id, 'meetingnumber' => $data['meetingnumber']);
         if ($meeting) {
-            $conditions['id'] = array('!=', $meeting->id);  // Exclude current meeting when editing
+            // For editing: check if another meeting has the same number
+            $sql = "SELECT id FROM {qratt_meetings} WHERE qrattid = ? AND meetingnumber = ? AND id != ?";
+            $params = array($qratt->id, $data['meetingnumber'], $meeting->id);
+        } else {
+            // For new meetings: check if meeting number exists
+            $sql = "SELECT id FROM {qratt_meetings} WHERE qrattid = ? AND meetingnumber = ?";
+            $params = array($qratt->id, $data['meetingnumber']);
         }
         
-        if ($DB->record_exists('qratt_meetings', $conditions)) {
+        if ($DB->record_exists_sql($sql, $params)) {
             $errors['meetingnumber'] = get_string('meetingnumberexists', 'qratt');
         }
         
