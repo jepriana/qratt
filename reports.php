@@ -151,59 +151,8 @@ if ($download == 'csv') {
     exit;
 }
 
-/**
- * Display institution header for reports
- */
-function display_institution_header() {
-    $institutioninfo = qratt_get_institution_info();
-    
-    if (!$institutioninfo->includeinreports || empty($institutioninfo->name)) {
-        return;
-    }
-    
-    $header = '';
-    
-    // Add logo if enabled and available
-    if ($institutioninfo->includelogo) {
-        $logourl = qratt_get_institution_logo_url();
-        if ($logourl) {
-            $header .= html_writer::img($logourl, get_string('institutionlogo', 'mod_qratt'), 
-                array('class' => 'institution-logo', 'style' => 'max-height: 80px; max-width: 200px; margin-bottom: 10px;'));
-            $header .= html_writer::empty_tag('br');
-        }
-    }
-    
-    // Add institution name
-    $header .= html_writer::tag('h3', $institutioninfo->name, array('class' => 'institution-name'));
-    
-    // Add address if provided
-    if (!empty($institutioninfo->address)) {
-        $header .= html_writer::tag('p', $institutioninfo->address, array('class' => 'institution-address'));
-    }
-    
-    // Add contact information
-    $contact = array();
-    if (!empty($institutioninfo->phone)) {
-        $contact[] = get_string('institutionphone', 'mod_qratt') . ': ' . $institutioninfo->phone;
-    }
-    if (!empty($institutioninfo->fax)) {
-        $contact[] = get_string('institutionfax', 'mod_qratt') . ': ' . $institutioninfo->fax;
-    }
-    
-    if (!empty($contact)) {
-        $header .= html_writer::tag('p', implode(' | ', $contact), array('class' => 'institution-contact'));
-    }
-    
-    if (!empty($header)) {
-        echo html_writer::div($header, 'institution-header text-center mb-4 p-3 border-bottom');
-    }
-}
-
 // Output dimulai di sini
 echo $OUTPUT->header();
-
-// Display institution header
-display_institution_header();
 
 // Tampilkan tab navigasi
 $tabs = array();
@@ -540,49 +489,6 @@ echo html_writer::div(
 );
 
 ?>
-<style>
-.institution-header {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-}
-
-.institution-logo {
-    display: block;
-    margin: 0 auto 10px;
-}
-
-.institution-name {
-    color: #495057;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-.institution-address {
-    color: #6c757d;
-    margin-bottom: 0.5rem;
-    font-style: italic;
-}
-
-.institution-contact {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 0;
-}
-
-@media print {
-    .institution-header {
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-    }
-    
-    .institution-logo {
-        max-height: 60px !important;
-    }
-}
-</style>
 <?php
 
 echo $OUTPUT->footer();
