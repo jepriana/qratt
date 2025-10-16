@@ -97,12 +97,6 @@ if ($ADMIN->fulltree) {
         new lang_string('reportsettings', 'mod_qratt'),
         new lang_string('reportsettings_desc', 'mod_qratt')));
 
-    // Include institution info in reports
-    $settings->add(new admin_setting_configcheckbox('mod_qratt/includeinstitutioninfo',
-        new lang_string('includeinstitutioninfo', 'mod_qratt'),
-        new lang_string('includeinstitutioninfo_desc', 'mod_qratt'),
-        1));
-
     // Include logo in reports
     $settings->add(new admin_setting_configcheckbox('mod_qratt/includelogoinreports',
         new lang_string('includelogoinreports', 'mod_qratt'),
@@ -131,6 +125,18 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('mod_qratt/includecityinreports',
         new lang_string('includecityinreports', 'mod_qratt'),
         new lang_string('includecityinreports_desc', 'mod_qratt'),
+        1));
+
+    // Include phone in reports
+    $settings->add(new admin_setting_configcheckbox('mod_qratt/includephoneinreports',
+        new lang_string('includephoneinreports', 'mod_qratt'),
+        new lang_string('includephoneinreports_desc', 'mod_qratt'),
+        1));
+
+    // Include fax in reports
+    $settings->add(new admin_setting_configcheckbox('mod_qratt/includefaxinreports',
+        new lang_string('includefaxinreports', 'mod_qratt'),
+        new lang_string('includefaxinreports_desc', 'mod_qratt'),
         1));
 
     $ADMIN->add('modsettings', $settings);

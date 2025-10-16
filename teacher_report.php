@@ -67,6 +67,8 @@ $includeaddressinreports = get_config('mod_qratt', 'includeaddressinreports');
 $includewebsiteinreports = get_config('mod_qratt', 'includewebsiteinreports');
 $includeemailinreports = get_config('mod_qratt', 'includeemailinreports');
 $includecityinreports = get_config('mod_qratt', 'includecityinreports');
+$includephoneinreports = get_config('mod_qratt', 'includephoneinreports');
+$includefaxinreports = get_config('mod_qratt', 'includefaxinreports');
 
 // Get meetings
 $meetings = $DB->get_records('qratt_meetings', array('qrattid' => $qratt->id), 'meetingnumber ASC');
@@ -123,6 +125,10 @@ header('Content-Type: text/html; charset=utf-8');
     <meta charset="UTF-8">
     <title><?php echo get_string('teacherreport', 'qratt'); ?></title>
     <style>
+        @page {
+            size: A4 portrait;
+            margin: 1cm;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -225,17 +231,27 @@ header('Content-Type: text/html; charset=utf-8');
                 <?php if ($includeaddressinreports && !empty($institutionaddress)): ?>
                     <?php echo nl2br(htmlspecialchars($institutionaddress)); ?><br>
                 <?php endif; ?>
-                <?php if ($includewebsiteinreports && !empty($institutionwebsite)): ?>
-                    Website: <?php echo htmlspecialchars($institutionwebsite); ?><br>
+                <?php 
+                $phonefax = array();
+                if ($includephoneinreports && !empty($institutionphone)) {
+                    $phonefax[] = 'Phone: ' . htmlspecialchars($institutionphone);
+                }
+                if ($includefaxinreports && !empty($institutionfax)) {
+                    $phonefax[] = 'Fax: ' . htmlspecialchars($institutionfax);
+                }
+                if (!empty($phonefax)): ?>
+                    <?php echo implode(' | ', $phonefax); ?><br>
                 <?php endif; ?>
-                <?php if ($includeemailinreports && !empty($institutionemail)): ?>
-                    Email: <?php echo htmlspecialchars($institutionemail); ?><br>
-                <?php endif; ?>
-                <?php if (!empty($institutionphone)): ?>
-                    Phone: <?php echo htmlspecialchars($institutionphone); ?><br>
-                <?php endif; ?>
-                <?php if (!empty($institutionfax)): ?>
-                    Fax: <?php echo htmlspecialchars($institutionfax); ?>
+                <?php 
+                $emailweb = array();
+                if ($includeemailinreports && !empty($institutionemail)) {
+                    $emailweb[] = 'Email: ' . htmlspecialchars($institutionemail);
+                }
+                if ($includewebsiteinreports && !empty($institutionwebsite)) {
+                    $emailweb[] = 'Website: ' . htmlspecialchars($institutionwebsite);
+                }
+                if (!empty($emailweb)): ?>
+                    <?php echo implode(' | ', $emailweb); ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -343,10 +359,13 @@ header('Content-Type: text/html; charset=utf-8');
 
     <!-- Footer -->
     <div class="footer">
-        <?php if ($includecityinreports && !empty($institutioncity)): ?>
-            <?php echo htmlspecialchars($institutioncity) . ', ' . userdate(time(), get_string('strftimedatefullshort')); ?>
+        <?php 
+        // Format date as dd MMMM yyyy (Indonesian style)
+        $dateformat = '%d %B %Y';
+        if ($includecityinreports && !empty($institutioncity)): ?>
+            <?php echo htmlspecialchars($institutioncity) . ', ' . userdate(time(), $dateformat); ?>
         <?php else: ?>
-            <?php echo userdate(time(), get_string('strftimedatefullshort')); ?>
+            <?php echo userdate(time(), $dateformat); ?>
         <?php endif; ?>
         <div class="footer-signature">
             <?php echo get_string('lecturer_in_charge', 'qratt'); ?><br><br><br>

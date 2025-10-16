@@ -190,8 +190,6 @@ $string['institutionlogo_desc'] = 'Upload institution logo to be used in reports
 
 $string['reportsettings'] = 'Report Settings';
 $string['reportsettings_desc'] = 'Configure what information to include in attendance reports.';
-$string['includeinstitutioninfo'] = 'Include Institution Information';
-$string['includeinstitutioninfo_desc'] = 'Include institution name, address, and contact information in generated reports';
 $string['includelogoinreports'] = 'Include Logo in Reports';
 $string['includelogoinreports_desc'] = 'Include institution logo in generated reports';
 $string['includeaddressinreports'] = 'Include Address in Reports';
@@ -202,6 +200,10 @@ $string['includeemailinreports'] = 'Include Email in Reports';
 $string['includeemailinreports_desc'] = 'Include institution email in generated reports';
 $string['includecityinreports'] = 'Include City in Reports';
 $string['includecityinreports_desc'] = 'Include institution city in report footers';
+$string['includephoneinreports'] = 'Include Phone in Reports';
+$string['includephoneinreports_desc'] = 'Include institution phone number in generated reports';
+$string['includefaxinreports'] = 'Include Fax in Reports';
+$string['includefaxinreports_desc'] = 'Include institution fax number in generated reports';
 
 // Institution fields
 $string['institutioncity'] = 'Institution City';

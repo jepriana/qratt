@@ -190,8 +190,6 @@ $string['institutionlogo_desc'] = 'Upload logo institusi untuk digunakan dalam l
 
 $string['reportsettings'] = 'Pengaturan Laporan';
 $string['reportsettings_desc'] = 'Konfigurasi informasi apa yang akan disertakan dalam laporan absensi.';
-$string['includeinstitutioninfo'] = 'Sertakan Informasi Institusi';
-$string['includeinstitutioninfo_desc'] = 'Sertakan nama institusi, alamat, dan informasi kontak dalam laporan yang dibuat';
 $string['includelogoinreports'] = 'Sertakan Logo dalam Laporan';
 $string['includelogoinreports_desc'] = 'Sertakan logo institusi dalam laporan yang dibuat';
 $string['includeaddressinreports'] = 'Sertakan Alamat dalam Laporan';
@@ -202,6 +200,10 @@ $string['includeemailinreports'] = 'Sertakan Email dalam Laporan';
 $string['includeemailinreports_desc'] = 'Sertakan email institusi dalam laporan yang dibuat';
 $string['includecityinreports'] = 'Sertakan Kota dalam Laporan';
 $string['includecityinreports_desc'] = 'Sertakan kota institusi dalam footer laporan';
+$string['includephoneinreports'] = 'Sertakan Telepon dalam Laporan';
+$string['includephoneinreports_desc'] = 'Sertakan nomor telepon institusi dalam laporan yang dibuat';
+$string['includefaxinreports'] = 'Sertakan Fax dalam Laporan';
+$string['includefaxinreports_desc'] = 'Sertakan nomor fax institusi dalam laporan yang dibuat';
 
 // Institution fields
 $string['institutioncity'] = 'Kota Institusi';
