@@ -24,22 +24,22 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['modulename'] = 'Absensi QR';
-$string['modulenameplural'] = 'Absensi QR';
-$string['modulename_help'] = 'Gunakan modul Absensi QR untuk melacak kehadiran mahasiswa menggunakan kode QR. Dosen dapat membuat pertemuan dan menghasilkan kode QR yang dipindai mahasiswa untuk menandai kehadiran mereka.';
-$string['qratt:addinstance'] = 'Tambah Absensi QR baru';
-$string['qratt:view'] = 'Lihat Absensi QR';
-$string['qratt:manage'] = 'Kelola Absensi QR';
-$string['qratt:takeattendance'] = 'Ambil absensi';
-$string['qratt:viewreports'] = 'Lihat laporan absensi';
-$string['qratt:manageattendances'] = 'Kelola catatan absensi';
-$string['qratt:canbelisted'] = 'Dapat terdaftar dalam absensi';
+$string['modulename'] = 'Presensi QR';
+$string['modulenameplural'] = 'Presensi QR';
+$string['modulename_help'] = 'Gunakan modul Presensi QR untuk melacak kehadiran mahasiswa menggunakan kode QR. Dosen dapat membuat pertemuan dan menghasilkan kode QR yang dipindai mahasiswa untuk menandai kehadiran mereka.';
+$string['qratt:addinstance'] = 'Tambah Presensi QR baru';
+$string['qratt:view'] = 'Lihat Presensi QR';
+$string['qratt:manage'] = 'Kelola Presensi QR';
+$string['qratt:takeattendance'] = 'Catat kehadiran';
+$string['qratt:viewreports'] = 'Lihat laporan presensi';
+$string['qratt:manageattendances'] = 'Kelola catatan presensi';
+$string['qratt:canbelisted'] = 'Dapat terdaftar dalam presensi';
 $string['qrattfieldset'] = 'Fieldset contoh kustom';
-$string['qrattname'] = 'Nama Absensi QR';
+$string['qrattname'] = 'Nama Presensi QR';
 $string['qrattname_help'] = 'Ini adalah konten tooltip bantuan yang terkait dengan field qrattname. Sintaks Markdown didukung.';
 $string['qratt'] = 'qratt';
-$string['pluginadministration'] = 'Administrasi Absensi QR';
-$string['pluginname'] = 'Absensi QR';
+$string['pluginadministration'] = 'Administrasi Presensi QR';
+$string['pluginname'] = 'Presensi QR';
 
 // Navigation
 $string['overview'] = 'Ringkasan';
@@ -72,7 +72,7 @@ $string['excused'] = 'Izin';
 
 // Messages
 $string['nomeetings'] = 'Belum ada pertemuan yang dibuat.';
-$string['nomeetingsinfo'] = 'Untuk mulai mengambil absensi, Anda perlu membuat pertemuan terlebih dahulu.';
+$string['nomeetingsinfo'] = 'Untuk mulai mengambil presensi, Anda perlu membuat pertemuan terlebih dahulu.';
 $string['attendancerecord'] = 'Hadir {$a->present} dari {$a->total} pertemuan';
 $string['attendancesummary'] = 'Ringkasan Kehadiran';
 $string['totalmeetings'] = 'Total pertemuan';
@@ -253,22 +253,22 @@ $string['meetingteacher_help'] = 'Pilih dosen yang akan mengajar pada pertemuan 
 $string['selectteacher'] = 'Pilih dosen';
 
 // Report strings
-$string['studentreport'] = 'Laporan Kehadiran Mahasiswa';
-$string['teacherreport'] = 'Laporan Kehadiran Dosen';
+$string['studentreport'] = 'Laporan Mahasiswa';
+$string['teacherreport'] = 'Laporan Dosen';
 $string['no'] = 'No.';
 $string['nim'] = 'NIM';
 $string['fullname'] = 'Nama Lengkap';
 $string['numberpresent'] = 'Jumlah Hadir';
 $string['numberabsent'] = 'Jumlah Tidak Hadir';
 $string['print'] = 'Cetak';
-$string['lecturer_in_charge'] = 'Dosen yang Bersangkutan';
+$string['lecturer_in_charge'] = 'Dosen Pengampu';
 
 // Events
-$string['eventcoursemoduleviewed'] = 'Modul Absensi QR dilihat';
+$string['eventcoursemoduleviewed'] = 'Modul Presensi QR dilihat';
 
 // Privacy
-$string['privacy:metadata'] = 'Plugin Absensi QR menyimpan data kehadiran untuk pengguna.';
-$string['privacy:metadata:qratt_attendance'] = 'Informasi tentang kehadiran pengguna dalam aktivitas Absensi QR.';
+$string['privacy:metadata'] = 'Plugin Presensi QR menyimpan data kehadiran untuk pengguna.';
+$string['privacy:metadata:qratt_attendance'] = 'Informasi tentang kehadiran pengguna dalam aktivitas Presensi QR.';
 $string['privacy:metadata:qratt_attendance:userid'] = 'ID pengguna yang kehadirannya sedang dicatat.';
 $string['privacy:metadata:qratt_attendance:status'] = 'Status kehadiran pengguna untuk pertemuan.';
 $string['privacy:metadata:qratt_attendance:scantime'] = 'Waktu ketika pengguna memindai kode QR.';
