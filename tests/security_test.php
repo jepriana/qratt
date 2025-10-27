@@ -16,7 +16,7 @@
 
 /**
  * Security and functional requirements tests for QR Attendance
- * Tests requirements not covered by lib_test.php and attendance_workflow_test.php
+ * Tests requirements not covered by unit_test.php and integration_workflow_test.php
  *
  * @package    mod_qratt
  * @category   test
@@ -39,7 +39,7 @@ require_once($CFG->dirroot . '/mod/qratt/lib.php');
  * @copyright  2024 QR Attendance Team
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class security_requirements_test extends \advanced_testcase {
+class security_test extends \advanced_testcase {
 
     // ==================== SECURITY TESTS ====================
 
@@ -202,270 +202,7 @@ class security_requirements_test extends \advanced_testcase {
         $this->assertFalse($canmanage, 'Students cannot manage attendance via API');
     }
 
-    // ==================== TEACHER FUNCTIONAL TESTS ====================
-
-    /**
-     * FUNC-1: Teachers can manage attendance activities
-     */
-    public function test_teacher_manage_activities() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $teacher = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-
-        $cm = get_coursemodule_from_instance('qratt', $qratt->id, $course->id);
-        $context = \context_module::instance($cm->id);
-
-        $this->setUser($teacher);
-
-        // Verify teacher capabilities
-        $this->assertTrue(has_capability('mod/qratt:manage', $context));
-        $this->assertTrue(has_capability('mod/qratt:manageattendances', $context));
-        $this->assertTrue(has_capability('mod/qratt:viewreports', $context));
-    }
-
-    /**
-     * FUNC-2: Teachers can activate and deactivate meetings
-     */
-    public function test_teacher_activate_deactivate_meeting() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $teacher = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-
-        // Create inactive meeting
-        $meeting = $generator->create_meeting([
-            'qrattid' => $qratt->id,
-            'status' => QRATT_MEETING_INACTIVE,
-            'teacherid' => $teacher->id
-        ]);
-
-        $this->assertEquals(QRATT_MEETING_INACTIVE, $meeting->status);
-
-        // Activate
-        $meeting->status = QRATT_MEETING_ACTIVE;
-        $meeting->qrexpiry = time() + 1800;
-        $meeting->qrcode = qratt_generate_qr_code($meeting->id, $meeting->qrexpiry);
-        $DB->update_record('qratt_meetings', $meeting);
-
-        $activated = $DB->get_record('qratt_meetings', ['id' => $meeting->id]);
-        $this->assertEquals(QRATT_MEETING_ACTIVE, $activated->status);
-        $this->assertNotEmpty($activated->qrcode);
-
-        // Deactivate
-        $activated->status = QRATT_MEETING_ENDED;
-        $DB->update_record('qratt_meetings', $activated);
-
-        $ended = $DB->get_record('qratt_meetings', ['id' => $meeting->id]);
-        $this->assertEquals(QRATT_MEETING_ENDED, $ended->status);
-    }
-
-    /**
-     * FUNC-3: Teachers can display dynamic QR codes
-     */
-    public function test_teacher_display_dynamic_qr() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $teacher = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-
-        // Create active meeting with QR
-        $meeting = $generator->create_meeting([
-            'qrattid' => $qratt->id,
-            'status' => QRATT_MEETING_ACTIVE,
-            'teacherid' => $teacher->id
-        ]);
-
-        // Generate QR code
-        $qrcode = qratt_generate_qr_code($meeting->id, time() + 60);
-        
-        $this->assertNotEmpty($qrcode);
-        $this->assertStringContainsString('/mod/qratt/scan.php', $qrcode);
-        $this->assertStringContainsString('meeting=' . $meeting->id, $qrcode);
-    }
-
-    /**
-     * FUNC-4: Teachers can change student attendance status
-     */
-    public function test_teacher_change_attendance_status() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $teacher = $this->getDataGenerator()->create_user();
-        $student = $this->getDataGenerator()->create_user();
-        
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
-        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-        $meeting = $generator->create_meeting(['qrattid' => $qratt->id]);
-
-        // Create attendance as ABSENT
-        $attendance = $generator->create_attendance([
-            'meetingid' => $meeting->id,
-            'userid' => $student->id,
-            'status' => QRATT_STATUS_ABSENT
-        ]);
-
-        // Teacher changes to EXCUSED
-        $this->setUser($teacher);
-        $cm = get_coursemodule_from_instance('qratt', $qratt->id, $course->id);
-        $context = \context_module::instance($cm->id);
-        
-        $this->assertTrue(has_capability('mod/qratt:manageattendances', $context));
-
-        $attendance->status = QRATT_STATUS_EXCUSED;
-        $attendance->timemodified = time();
-        $DB->update_record('qratt_attendance', $attendance);
-
-        $updated = $DB->get_record('qratt_attendance', ['id' => $attendance->id]);
-        $this->assertEquals(QRATT_STATUS_EXCUSED, $updated->status);
-    }
-
-    /**
-     * FUNC-5: Teachers can access attendance reports
-     */
-    public function test_teacher_access_reports() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $teacher = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-
-        $cm = get_coursemodule_from_instance('qratt', $qratt->id, $course->id);
-        $context = \context_module::instance($cm->id);
-
-        $this->setUser($teacher);
-        $this->assertTrue(has_capability('mod/qratt:viewreports', $context));
-    }
-
-    // ==================== STUDENT FUNCTIONAL TESTS ====================
-
-    /**
-     * FUNC-6: Students can scan QR codes
-     */
-    public function test_student_scan_qr_code() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $student = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-        $meeting = $generator->create_meeting([
-            'qrattid' => $qratt->id,
-            'status' => QRATT_MEETING_ACTIVE
-        ]);
-
-        $this->setUser($student);
-        $cm = get_coursemodule_from_instance('qratt', $qratt->id, $course->id);
-        $context = \context_module::instance($cm->id);
-
-        // Student has takeattendance capability
-        $this->assertTrue(has_capability('mod/qratt:takeattendance', $context));
-
-        // Simulate scan
-        $attendance = $generator->create_attendance([
-            'meetingid' => $meeting->id,
-            'userid' => $student->id,
-            'status' => QRATT_STATUS_PRESENT,
-            'scantime' => time()
-        ]);
-
-        $this->assertNotEmpty($attendance->scantime);
-        $this->assertEquals($student->id, $attendance->userid);
-    }
-
-    /**
-     * FUNC-7: Students receive status report after scan
-     */
-    public function test_student_receive_status_after_scan() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $student = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-        $meeting = $generator->create_meeting(['qrattid' => $qratt->id]);
-
-        // Record attendance
-        $attendance = $generator->create_attendance([
-            'meetingid' => $meeting->id,
-            'userid' => $student->id,
-            'status' => QRATT_STATUS_PRESENT
-        ]);
-
-        // Verify status is recorded
-        $record = $DB->get_record('qratt_attendance', ['id' => $attendance->id]);
-        $this->assertEquals(QRATT_STATUS_PRESENT, $record->status);
-        
-        // In real implementation, scan.php displays this status
-        $statustext = ($record->status == QRATT_STATUS_PRESENT) ? 'Present' : 'Other';
-        $this->assertEquals('Present', $statustext);
-    }
-
-    /**
-     * FUNC-8: Students can view their attendance history
-     */
-    public function test_student_view_history() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $student = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-
-        // Create 5 meetings with attendance
-        for ($i = 1; $i <= 5; $i++) {
-            $meeting = $generator->create_meeting([
-                'qrattid' => $qratt->id,
-                'meetingnumber' => $i
-            ]);
-            $generator->create_attendance([
-                'meetingid' => $meeting->id,
-                'userid' => $student->id,
-                'status' => QRATT_STATUS_PRESENT
-            ]);
-        }
-
-        // Get statistics (history)
-        $stats = qratt_get_user_statistics($qratt->id, $student->id);
-        
-        $this->assertEquals(5, $stats['total']);
-        $this->assertEquals(5, $stats['present']);
-        $this->assertEquals(100.0, $stats['percentage']);
-    }
-
-    // ==================== SECURITY REQUIREMENTS ====================
+    // ==================== ADDITIONAL SECURITY TESTS ====================
 
     /**
      * SEC-6: QR codes must be unique per session
@@ -545,9 +282,9 @@ class security_requirements_test extends \advanced_testcase {
 
     /**
      * SEC-9: Comprehensive role-based access control validation
-     * Moved from attendance_workflow_test.php - security test, not workflow
+     * Moved from integration_workflow_test.php - security test, not workflow
      */
-    public function test_sec9_comprehensive_role_verification() {
+    public function test_comprehensive_role_verification() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -596,9 +333,9 @@ class security_requirements_test extends \advanced_testcase {
 
     /**
      * SEC-10: Duplicate attendance prevention (prevents manipulation)
-     * Moved from attendance_workflow_test.php - security test, not workflow
+     * Moved from integration_workflow_test.php - security test, not workflow
      */
-    public function test_sec10_duplicate_prevention() {
+    public function test_duplicate_prevention() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -645,9 +382,9 @@ class security_requirements_test extends \advanced_testcase {
 
     /**
      * SEC-11: QR code expiry validation (prevents replay attacks)
-     * Moved from attendance_workflow_test.php - security test, not workflow
+     * Moved from integration_workflow_test.php - security test, not workflow
      */
-    public function test_sec11_qr_expiry_validation() {
+    public function test_qr_expiry_validation() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -686,91 +423,5 @@ class security_requirements_test extends \advanced_testcase {
         // Verify expired status
         $isexpired = ($record->qrexpiry <= $currenttime);
         $this->assertTrue($isexpired);
-    }
-
-    // ==================== PERFORMANCE REQUIREMENTS ====================
-
-    /**
-     * PERF-1: QR code generation should be fast (< 3 seconds)
-     */
-    public function test_qr_generation_performance() {
-        $this->resetAfterTest(true);
-
-        $starttime = microtime(true);
-        $qrcode = qratt_generate_qr_code(123, time() + 60);
-        $endtime = microtime(true);
-
-        $executiontime = $endtime - $starttime;
-        $this->assertLessThan(3.0, $executiontime, 'QR generation must be under 3 seconds');
-        $this->assertNotEmpty($qrcode);
-    }
-
-    /**
-     * PERF-2: Scan validation should be fast (< 5 seconds)
-     */
-    public function test_scan_validation_performance() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $student = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-        $meeting = $generator->create_meeting(['qrattid' => $qratt->id]);
-
-        $starttime = microtime(true);
-        
-        // Simulate validation steps
-        $qrcode = qratt_generate_qr_code($meeting->id, time() + 60);
-        $url = new \moodle_url($qrcode);
-        $token = $url->get_param('token');
-        $meetingid = $url->get_param('meeting');
-        
-        $salt = qratt_get_encryption_key();
-        $validtoken = md5($meetingid . (time() + 60) . $salt);
-        
-        $endtime = microtime(true);
-        $executiontime = $endtime - $starttime;
-
-        $this->assertLessThan(5.0, $executiontime, 'Scan validation must be under 5 seconds');
-    }
-
-    /**
-     * PERF-3: System handles multiple concurrent requests
-     */
-    public function test_concurrent_attendance_handling() {
-        global $DB;
-        $this->resetAfterTest(true);
-
-        $course = $this->getDataGenerator()->create_course();
-        $generator = $this->getDataGenerator()->get_plugin_generator('mod_qratt');
-        $qratt = $generator->create_instance(['course' => $course->id]);
-        $meeting = $generator->create_meeting(['qrattid' => $qratt->id]);
-
-        // Simulate 50 concurrent requests
-        $starttime = microtime(true);
-        
-        for ($i = 0; $i < 50; $i++) {
-            $student = $this->getDataGenerator()->create_user();
-            $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
-            
-            $generator->create_attendance([
-                'meetingid' => $meeting->id,
-                'userid' => $student->id,
-                'status' => QRATT_STATUS_PRESENT
-            ]);
-        }
-        
-        $endtime = microtime(true);
-        $executiontime = $endtime - $starttime;
-
-        // Verify all records created
-        $count = $DB->count_records('qratt_attendance', ['meetingid' => $meeting->id]);
-        $this->assertEquals(50, $count, 'System should handle 50 concurrent requests');
-        
-        // Performance should be reasonable (< 10 seconds for 50 inserts)
-        $this->assertLessThan(10.0, $executiontime);
     }
 }

@@ -38,7 +38,7 @@ require_once($CFG->dirroot . '/mod/qratt/lib.php');
  * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class lib_test extends \advanced_testcase {
+class unit_test extends \advanced_testcase {
 
     /**
      * Test qratt_supports function

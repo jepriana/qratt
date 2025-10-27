@@ -113,8 +113,8 @@ The testing strategy employs a **hybrid testing approach** combining:
 
 ```
 tests/
-├── lib_test.php                    # Unit tests for core library functions
-├── attendance_workflow_test.php    # Integration tests for workflows
+├── unit_test.php                    # Unit tests for core library functions
+├── integration_workflow_test.php    # Integration tests for workflows
 ├── generator/
 │   └── lib.php                     # Test data generator
 └── README.md                       # Testing documentation
@@ -204,10 +204,10 @@ Memory: 77.00 MB
 
 ### 5.2 Detailed Test Results
 
-#### Unit Tests (lib_test.php)
+#### Unit Tests (unit_test.php)
 
 ```
-lib_test (mod_qratt\lib_test)
+unit_test (mod_qratt\unit_test)
  ✔ Qratt supports                    [3 assertions]
  ✔ Qratt add instance                [4 assertions]
  ✔ Qratt update instance             [3 assertions]
@@ -221,10 +221,10 @@ lib_test (mod_qratt\lib_test)
 Subtotal: 9 tests, 49 assertions, 100% pass rate
 ```
 
-#### Integration Tests (attendance_workflow_test.php)
+#### Integration Tests (integration_workflow_test.php)
 
 ```
-attendance_workflow_test (mod_qratt\attendance_workflow_test)
+integration_workflow_test (mod_qratt\integration_workflow_test)
  ✔ Complete attendance workflow       [8 assertions]
  ✔ Qr token validation                [3 assertions]
  ✔ Meeting status transitions         [6 assertions]
@@ -766,15 +766,15 @@ cd /Applications/MAMP/htdocs/moodle500
 php admin/tool/phpunit/cli/init.php
 
 # Run all tests
-vendor/bin/phpunit mod/qratt/tests/lib_test.php \
-                    mod/qratt/tests/attendance_workflow_test.php
+vendor/bin/phpunit mod/qratt/tests/unit_test.php \
+                    mod/qratt/tests/integration_workflow_test.php
 
 # Run with detailed output
-vendor/bin/phpunit mod/qratt/tests/lib_test.php --testdox
+vendor/bin/phpunit mod/qratt/tests/unit_test.php --testdox
 
 # Run specific test
 vendor/bin/phpunit --filter test_qratt_add_instance \
-                    mod/qratt/tests/lib_test.php
+                    mod/qratt/tests/unit_test.php
 
 # Generate coverage report (requires xdebug)
 vendor/bin/phpunit --coverage-html coverage/ mod/qratt/tests/

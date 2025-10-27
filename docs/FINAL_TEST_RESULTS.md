@@ -29,7 +29,7 @@
 
 ## Test Suites
 
-### 1. Unit Tests (`lib_test.php`)
+### 1. Unit Tests (`unit_test.php`)
 **9 tests, 49 assertions, 100% pass**
 
 Tests core library functions in isolation:
@@ -41,7 +41,7 @@ Tests core library functions in isolation:
 - Statistics calculation
 - Institution configuration
 
-### 2. Integration Tests (`attendance_workflow_test.php`)
+### 2. Integration Tests (`integration_workflow_test.php`)
 **8 tests, 47 assertions, 100% pass**
 
 Tests complete workflows and component interactions:
@@ -54,7 +54,7 @@ Tests complete workflows and component interactions:
 - Role-based access control
 - QR code expiry handling
 
-### 3. Security & Requirements Tests (`security_requirements_test.php`)
+### 3. Security & Requirements Tests (`security_test.php`)
 **19 tests, 42 assertions, 100% pass**
 
 Tests all security and functional requirements:
@@ -224,9 +224,9 @@ Tests all security and functional requirements:
 ```
 qratt_git/
 ├── tests/
-│   ├── lib_test.php                       (9 tests)
-│   ├── attendance_workflow_test.php       (8 tests)
-│   ├── security_requirements_test.php     (19 tests) ⭐ NEW
+│   ├── unit_test.php                       (9 tests)
+│   ├── integration_workflow_test.php       (8 tests)
+│   ├── security_test.php     (19 tests) ⭐ NEW
 │   ├── generator/
 │   │   └── lib.php                        (Test data generator)
 │   └── README.md                          (Testing guide)

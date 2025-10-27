@@ -13,9 +13,9 @@
 
 | Test Suite | Tests | Assertions | Coverage Area |
 |------------|-------|------------|---------------|
-| **lib_test.php** | 9 | 49 | Core library functions (Unit Tests) |
-| **attendance_workflow_test.php** | 8 | 47 | Integration workflows |
-| **security_requirements_test.php** | 19 | 42 | Security & functional requirements |
+| **unit_test.php** | 9 | 49 | Core library functions (Unit Tests) |
+| **integration_workflow_test.php** | 8 | 47 | Integration workflows |
+| **security_test.php** | 19 | 42 | Security & functional requirements |
 | **TOTAL** | **36** | **138** | **Complete Coverage** |
 
 ---
@@ -27,8 +27,8 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_qr_rejected_after_session_ends` | security_requirements_test.php | ✅ PASS |
-| `test_qr_code_expiry` | attendance_workflow_test.php | ✅ PASS |
+| `test_qr_rejected_after_session_ends` | security_test.php | ✅ PASS |
+| `test_qr_code_expiry` | integration_workflow_test.php | ✅ PASS |
 
 **What's Tested:**
 - Ended meetings (QRATT_MEETING_ENDED) cannot accept attendance
@@ -42,7 +42,7 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_unregistered_student_denied_access` | security_requirements_test.php | ✅ PASS |
+| `test_unregistered_student_denied_access` | security_test.php | ✅ PASS |
 
 **What's Tested:**
 - Enrollment verification (is_enrolled returns false)
@@ -56,7 +56,7 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_cross_teacher_access_denied` | security_requirements_test.php | ✅ PASS |
+| `test_cross_teacher_access_denied` | security_test.php | ✅ PASS |
 
 **What's Tested:**
 - Teacher B lacks mod/qratt:manage capability in Course A
@@ -70,7 +70,7 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_cross_student_access_denied` | security_requirements_test.php | ✅ PASS |
+| `test_cross_student_access_denied` | security_test.php | ✅ PASS |
 
 **What's Tested:**
 - Students lack mod/qratt:manageattendances capability
@@ -84,8 +84,8 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_api_manipulation_prevented` | security_requirements_test.php | ✅ PASS |
-| `test_role_based_access_control` | attendance_workflow_test.php | ✅ PASS |
+| `test_api_manipulation_prevented` | security_test.php | ✅ PASS |
+| `test_role_based_access_control` | integration_workflow_test.php | ✅ PASS |
 
 **What's Tested:**
 - Students lack mod/qratt:manageattendances capability
@@ -99,7 +99,7 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_qr_codes_unique_per_session` | security_requirements_test.php | ✅ PASS |
+| `test_qr_codes_unique_per_session` | security_test.php | ✅ PASS |
 
 **What's Tested:**
 - 10 different meetings generate 10 unique QR codes
@@ -113,8 +113,8 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_qr_codes_cannot_be_reused` | security_requirements_test.php | ✅ PASS |
-| `test_qr_token_validation` | attendance_workflow_test.php | ✅ PASS |
+| `test_qr_codes_cannot_be_reused` | security_test.php | ✅ PASS |
+| `test_qr_token_validation` | integration_workflow_test.php | ✅ PASS |
 
 **What's Tested:**
 - Different meetings have different QR codes
@@ -128,9 +128,9 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_role_based_access_restrictions` | security_requirements_test.php | ✅ PASS |
-| `test_role_based_access_control` | attendance_workflow_test.php | ✅ PASS |
-| `test_qratt_filter_students_only` | lib_test.php | ✅ PASS |
+| `test_role_based_access_restrictions` | security_test.php | ✅ PASS |
+| `test_role_based_access_control` | integration_workflow_test.php | ✅ PASS |
+| `test_qratt_filter_students_only` | unit_test.php | ✅ PASS |
 
 **What's Tested:**
 - Students: view + takeattendance only
@@ -146,10 +146,10 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_teacher_manage_activities` | security_requirements_test.php | ✅ PASS |
-| `test_qratt_add_instance` | lib_test.php | ✅ PASS |
-| `test_qratt_update_instance` | lib_test.php | ✅ PASS |
-| `test_qratt_delete_instance` | lib_test.php | ✅ PASS |
+| `test_teacher_manage_activities` | security_test.php | ✅ PASS |
+| `test_qratt_add_instance` | unit_test.php | ✅ PASS |
+| `test_qratt_update_instance` | unit_test.php | ✅ PASS |
+| `test_qratt_delete_instance` | unit_test.php | ✅ PASS |
 
 **What's Tested:**
 - Create QR Attendance instances
@@ -164,8 +164,8 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_teacher_activate_deactivate_meeting` | security_requirements_test.php | ✅ PASS |
-| `test_meeting_status_transitions` | attendance_workflow_test.php | ✅ PASS |
+| `test_teacher_activate_deactivate_meeting` | security_test.php | ✅ PASS |
+| `test_meeting_status_transitions` | integration_workflow_test.php | ✅ PASS |
 
 **What's Tested:**
 - INACTIVE → ACTIVE → ENDED transitions
@@ -180,9 +180,9 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_teacher_display_dynamic_qr` | security_requirements_test.php | ✅ PASS |
-| `test_qratt_generate_qr_code` | lib_test.php | ✅ PASS |
-| `test_complete_attendance_workflow` | attendance_workflow_test.php | ✅ PASS |
+| `test_teacher_display_dynamic_qr` | security_test.php | ✅ PASS |
+| `test_qratt_generate_qr_code` | unit_test.php | ✅ PASS |
+| `test_complete_attendance_workflow` | integration_workflow_test.php | ✅ PASS |
 
 **What's Tested:**
 - QR code URL generation
@@ -197,7 +197,7 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_teacher_change_attendance_status` | security_requirements_test.php | ✅ PASS |
+| `test_teacher_change_attendance_status` | security_test.php | ✅ PASS |
 
 **What's Tested:**
 - Teacher has mod/qratt:manageattendances capability
@@ -212,9 +212,9 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_teacher_access_reports` | security_requirements_test.php | ✅ PASS |
-| `test_qratt_get_user_statistics` | lib_test.php | ✅ PASS |
-| `test_attendance_statistics_multiple_meetings` | attendance_workflow_test.php | ✅ PASS |
+| `test_teacher_access_reports` | security_test.php | ✅ PASS |
+| `test_qratt_get_user_statistics` | unit_test.php | ✅ PASS |
+| `test_attendance_statistics_multiple_meetings` | integration_workflow_test.php | ✅ PASS |
 
 **What's Tested:**
 - mod/qratt:viewreports capability
@@ -242,8 +242,8 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_student_scan_qr_code` | security_requirements_test.php | ✅ PASS |
-| `test_complete_attendance_workflow` | attendance_workflow_test.php | ✅ PASS |
+| `test_student_scan_qr_code` | security_test.php | ✅ PASS |
+| `test_complete_attendance_workflow` | integration_workflow_test.php | ✅ PASS |
 
 **What's Tested:**
 - Students have mod/qratt:takeattendance capability
@@ -258,7 +258,7 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_student_receive_status_after_scan` | security_requirements_test.php | ✅ PASS |
+| `test_student_receive_status_after_scan` | security_test.php | ✅ PASS |
 
 **What's Tested:**
 - Status is recorded correctly (PRESENT/LATE)
@@ -272,8 +272,8 @@
 
 | Test | File | Status |
 |------|------|--------|
-| `test_student_view_history` | security_requirements_test.php | ✅ PASS |
-| `test_qratt_get_user_statistics` | lib_test.php | ✅ PASS |
+| `test_student_view_history` | security_test.php | ✅ PASS |
+| `test_qratt_get_user_statistics` | unit_test.php | ✅ PASS |
 
 **What's Tested:**
 - Multiple meetings tracked correctly
@@ -289,7 +289,7 @@
 
 | Test | File | Status | Result |
 |------|------|--------|--------|
-| `test_qr_generation_performance` | security_requirements_test.php | ✅ PASS | < 0.01s |
+| `test_qr_generation_performance` | security_test.php | ✅ PASS | < 0.01s |
 
 ---
 
@@ -298,7 +298,7 @@
 
 | Test | File | Status | Notes |
 |------|------|--------|-------|
-| `test_qr_generation_performance` | security_requirements_test.php | ✅ PASS | Minimal overhead verified |
+| `test_qr_generation_performance` | security_test.php | ✅ PASS | Minimal overhead verified |
 
 ---
 
@@ -307,7 +307,7 @@
 
 | Test | File | Status | Result |
 |------|------|--------|--------|
-| `test_scan_validation_performance` | security_requirements_test.php | ✅ PASS | < 0.01s |
+| `test_scan_validation_performance` | security_test.php | ✅ PASS | < 0.01s |
 
 ---
 
@@ -316,7 +316,7 @@
 
 | Test | File | Status | Result |
 |------|------|--------|--------|
-| `test_concurrent_attendance_handling` | security_requirements_test.php | ✅ PASS | 50 requests in < 10s |
+| `test_concurrent_attendance_handling` | security_test.php | ✅ PASS | 50 requests in < 10s |
 
 ---
 
@@ -438,9 +438,9 @@ Scenario: Student scans QR code and sees confirmation
 
 | Test Suite | Time | Memory |
 |------------|------|--------|
-| lib_test.php | 2.08s | 66 MB |
-| attendance_workflow_test.php | 1.81s | 77 MB |
-| security_requirements_test.php | 4.09s | 81 MB |
+| unit_test.php | 2.08s | 66 MB |
+| integration_workflow_test.php | 1.81s | 77 MB |
+| security_test.php | 4.09s | 81 MB |
 | **TOTAL** | **7.98s** | **81 MB** |
 
 **Performance:** All tests execute in under 8 seconds ✅

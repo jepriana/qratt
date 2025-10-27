@@ -90,7 +90,7 @@ Integration Tests (49%) █████████████████░�
 
 ## 🔍 Detailed Test Results
 
-### Unit Tests (lib_test.php)
+### Unit Tests (unit_test.php)
 
 | # | Test Name | Assertions | Time | Status |
 |---|-----------|------------|------|--------|
@@ -106,7 +106,7 @@ Integration Tests (49%) █████████████████░�
 
 **Subtotal:** 2.08 seconds, 49 assertions
 
-### Integration Tests (attendance_workflow_test.php)
+### Integration Tests (integration_workflow_test.php)
 
 | # | Test Name | Assertions | Time | Status |
 |---|-----------|------------|------|--------|
@@ -396,8 +396,8 @@ test_qratt_get_encryption_key       █        0.05s
 ```
 qratt_git/
 ├── tests/
-│   ├── lib_test.php                   ✅ 9 unit tests
-│   ├── attendance_workflow_test.php   ✅ 8 integration tests
+│   ├── unit_test.php                   ✅ 9 unit tests
+│   ├── integration_workflow_test.php   ✅ 8 integration tests
 │   ├── generator/
 │   │   └── lib.php                    ✅ Test data generator
 │   └── README.md                      ✅ Testing guide

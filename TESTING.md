@@ -20,19 +20,19 @@ Your PHPUnit testing environment is now fully configured and all tests are passi
 cd /Applications/MAMP/htdocs/moodle500
 
 # Run all qratt tests
-vendor/bin/phpunit mod/qratt/tests/lib_test.php mod/qratt/tests/attendance_workflow_test.php
+vendor/bin/phpunit mod/qratt/tests/unit_test.php mod/qratt/tests/integration_workflow_test.php
 
 # Run unit tests only
-vendor/bin/phpunit mod/qratt/tests/lib_test.php
+vendor/bin/phpunit mod/qratt/tests/unit_test.php
 
 # Run integration tests only
-vendor/bin/phpunit mod/qratt/tests/attendance_workflow_test.php
+vendor/bin/phpunit mod/qratt/tests/integration_workflow_test.php
 
 # Run with detailed output
-vendor/bin/phpunit mod/qratt/tests/lib_test.php --testdox
+vendor/bin/phpunit mod/qratt/tests/unit_test.php --testdox
 
 # Run with verbose assertions
-vendor/bin/phpunit mod/qratt/tests/lib_test.php -v
+vendor/bin/phpunit mod/qratt/tests/unit_test.php -v
 ```
 
 ## Configuration Files
@@ -55,7 +55,7 @@ Required settings:
 
 ## Test Coverage
 
-### Unit Tests (`lib_test.php`) - 9 tests
+### Unit Tests (`unit_test.php`) - 9 tests
 - ✅ Module feature support
 - ✅ Instance CRUD operations
 - ✅ QR code generation
@@ -65,7 +65,7 @@ Required settings:
 - ✅ Statistics calculation
 - ✅ Institution information
 
-### Integration Tests (`attendance_workflow_test.php`) - 8 tests
+### Integration Tests (`integration_workflow_test.php`) - 8 tests
 - ✅ Complete attendance workflow
 - ✅ QR token validation with expiry
 - ✅ Meeting status transitions
@@ -92,7 +92,7 @@ After making changes to your plugin:
 
 3. **Run tests:**
    ```bash
-   vendor/bin/phpunit mod/qratt/tests/lib_test.php --testdox
+   vendor/bin/phpunit mod/qratt/tests/unit_test.php --testdox
    ```
 
 ## Test Generator

@@ -6,8 +6,8 @@ This directory contains unit and integration tests for the mod_qratt Moodle plug
 
 ```
 tests/
-├── lib_test.php                    # Unit tests for lib.php functions
-├── attendance_workflow_test.php    # Integration tests for attendance workflow
+├── unit_test.php                    # Unit tests for lib.php functions
+├── integration_workflow_test.php    # Integration tests for attendance workflow
 ├── generator/
 │   └── lib.php                     # Test data generator
 └── README.md                       # This file
@@ -37,16 +37,16 @@ vendor/bin/phpunit --testsuite mod_qratt_testsuite
 ### Run specific test file
 ```bash
 # Unit tests for lib.php
-vendor/bin/phpunit mod/qratt/tests/lib_test.php
+vendor/bin/phpunit mod/qratt/tests/unit_test.php
 
 # Integration tests for attendance workflow
-vendor/bin/phpunit mod/qratt/tests/attendance_workflow_test.php
+vendor/bin/phpunit mod/qratt/tests/integration_workflow_test.php
 ```
 
 ### Run specific test method
 ```bash
-vendor/bin/phpunit --filter test_qratt_add_instance mod/qratt/tests/lib_test.php
-vendor/bin/phpunit --filter test_complete_attendance_workflow mod/qratt/tests/attendance_workflow_test.php
+vendor/bin/phpunit --filter test_qratt_add_instance mod/qratt/tests/unit_test.php
+vendor/bin/phpunit --filter test_complete_attendance_workflow mod/qratt/tests/integration_workflow_test.php
 ```
 
 ### Run with coverage (requires xdebug)
@@ -56,12 +56,12 @@ vendor/bin/phpunit --coverage-html coverage/ mod/qratt/tests/
 
 ### Run with verbose output
 ```bash
-vendor/bin/phpunit --testdox mod/qratt/tests/lib_test.php
+vendor/bin/phpunit --testdox mod/qratt/tests/unit_test.php
 ```
 
 ## Test Coverage
 
-### Unit Tests (lib_test.php)
+### Unit Tests (unit_test.php)
 - ✅ Module feature support (`qratt_supports`)
 - ✅ Instance creation (`qratt_add_instance`)
 - ✅ Instance update (`qratt_update_instance`)
@@ -72,7 +72,7 @@ vendor/bin/phpunit --testdox mod/qratt/tests/lib_test.php
 - ✅ User statistics calculation (`qratt_get_user_statistics`)
 - ✅ Institution information (`qratt_get_institution_info`)
 
-### Integration Tests (attendance_workflow_test.php)
+### Integration Tests (integration_workflow_test.php)
 - ✅ Complete attendance workflow (meeting → QR → scan → attendance)
 - ✅ QR token validation and expiry
 - ✅ Meeting status transitions (INACTIVE → ACTIVE → ENDED)

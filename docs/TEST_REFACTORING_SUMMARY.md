@@ -8,27 +8,27 @@
 ## 🎯 Refactoring Objective
 
 Reorganize test files to ensure tests are placed in appropriate categories based on their purpose:
-- **Unit Tests** → `lib_test.php` - Individual function testing
-- **Integration Tests** → `attendance_workflow_test.php` - Workflow and multi-step processes
-- **Security Tests** → `security_requirements_test.php` - Security and access control validation
+- **Unit Tests** → `unit_test.php` - Individual function testing
+- **Integration Tests** → `integration_workflow_test.php` - Workflow and multi-step processes
+- **Security Tests** → `security_test.php` - Security and access control validation
 
 ---
 
 ## 📋 Changes Made
 
-### Tests Moved from `attendance_workflow_test.php` → `security_requirements_test.php`
+### Tests Moved from `integration_workflow_test.php` → `security_test.php`
 
 | # | Old Test Name | New Test Name | Line | Reason |
 |---|---------------|---------------|------|--------|
-| 1 | `test_role_based_access_control` | `test_sec9_comprehensive_role_verification` | 550 | Validates security access controls, not workflow |
-| 2 | `test_duplicate_attendance_prevention` | `test_sec10_duplicate_prevention` | 601 | Prevents data manipulation (security measure) |
-| 3 | `test_qr_code_expiry` | `test_sec11_qr_expiry_validation` | 650 | Prevents replay attacks (security mechanism) |
+| 1 | `test_role_based_access_control` | `test_comprehensive_role_verification` | 550 | Validates security access controls, not workflow |
+| 2 | `test_duplicate_attendance_prevention` | `test_duplicate_prevention` | 601 | Prevents data manipulation (security measure) |
+| 3 | `test_qr_code_expiry` | `test_qr_expiry_validation` | 650 | Prevents replay attacks (security mechanism) |
 
 ---
 
 ## 🔍 Detailed Analysis
 
-### 1. **test_sec9_comprehensive_role_verification** (formerly `test_role_based_access_control`)
+### 1. **test_comprehensive_role_verification** (formerly `test_role_based_access_control`)
 
 **Why moved to security tests?**
 - Tests role-based access control (RBAC) - a fundamental security requirement
@@ -49,7 +49,7 @@ Reorganize test files to ensure tests are placed in appropriate categories based
 
 ---
 
-### 2. **test_sec10_duplicate_prevention** (formerly `test_duplicate_attendance_prevention`)
+### 2. **test_duplicate_prevention** (formerly `test_duplicate_attendance_prevention`)
 
 **Why moved to security tests?**
 - Prevents abuse and data manipulation
@@ -69,7 +69,7 @@ Reorganize test files to ensure tests are placed in appropriate categories based
 
 ---
 
-### 3. **test_sec11_qr_expiry_validation** (formerly `test_qr_code_expiry`)
+### 3. **test_qr_expiry_validation** (formerly `test_qr_code_expiry`)
 
 **Why moved to security tests?**
 - Prevents replay attacks using old QR codes
@@ -94,18 +94,18 @@ Reorganize test files to ensure tests are placed in appropriate categories based
 
 ### Before Refactoring
 ```
-lib_test.php:                    11 tests ✅
-attendance_workflow_test.php:    8 tests ✅
-security_requirements_test.php:  17 tests ✅
+unit_test.php:                    11 tests ✅
+integration_workflow_test.php:    8 tests ✅
+security_test.php:  17 tests ✅
 ────────────────────────────────────────
 TOTAL:                           36 tests
 ```
 
 ### After Refactoring
 ```
-lib_test.php:                    11 tests ✅ (unchanged)
-attendance_workflow_test.php:    5 tests ✅ (-3 moved)
-security_requirements_test.php:  20 tests ✅ (+3 added)
+unit_test.php:                    11 tests ✅ (unchanged)
+integration_workflow_test.php:    5 tests ✅ (-3 moved)
+security_test.php:  20 tests ✅ (+3 added)
 ────────────────────────────────────────
 TOTAL:                           36 tests ✅
 ```
@@ -117,9 +117,9 @@ TOTAL:                           36 tests ✅
 ### Full Test Suite Execution
 ```bash
 cd /Applications/MAMP/htdocs/moodle500
-php vendor/bin/phpunit mod/qratt/tests/lib_test.php \
-    mod/qratt/tests/attendance_workflow_test.php \
-    mod/qratt/tests/security_requirements_test.php
+php vendor/bin/phpunit mod/qratt/tests/unit_test.php \
+    mod/qratt/tests/integration_workflow_test.php \
+    mod/qratt/tests/security_test.php
 ```
 
 **Results:**
@@ -134,7 +134,7 @@ php vendor/bin/phpunit mod/qratt/tests/lib_test.php \
 
 ## 📁 Current Test Organization
 
-### `lib_test.php` - Unit Tests (11 tests)
+### `unit_test.php` - Unit Tests (11 tests)
 Pure function testing without complex scenarios:
 - ✅ Module feature support
 - ✅ Instance lifecycle (add/update/delete)
@@ -144,7 +144,7 @@ Pure function testing without complex scenarios:
 - ✅ User statistics calculation
 - ✅ Institution info retrieval
 
-### `attendance_workflow_test.php` - Integration Tests (5 tests)
+### `integration_workflow_test.php` - Integration Tests (5 tests)
 End-to-end workflows and multi-step processes:
 - ✅ Complete attendance workflow
 - ✅ QR token validation
@@ -152,7 +152,7 @@ End-to-end workflows and multi-step processes:
 - ✅ Late attendance threshold logic
 - ✅ Attendance statistics calculation
 
-### `security_requirements_test.php` - Security Tests (20 tests)
+### `security_test.php` - Security Tests (20 tests)
 
 **Security Requirements (SEC-1 to SEC-11):**
 - SEC-1: ✅ QR rejected after session ends
@@ -196,9 +196,9 @@ Tests are now categorized by their true purpose:
 
 ### 2. **Clearer Intent**
 New test names explicitly indicate security requirements:
-- `test_sec9_comprehensive_role_verification` - clear security focus
-- `test_sec10_duplicate_prevention` - obvious security mechanism
-- `test_sec11_qr_expiry_validation` - explicit security validation
+- `test_comprehensive_role_verification` - clear security focus
+- `test_duplicate_prevention` - obvious security mechanism
+- `test_qr_expiry_validation` - explicit security validation
 
 ### 3. **Complete Security Coverage**
 Security test file now has comprehensive coverage of:
@@ -218,19 +218,19 @@ Developers can now:
 
 ## 📝 Recommendations for Future Tests
 
-### When to add to `lib_test.php`:
+### When to add to `unit_test.php`:
 - ✅ Testing a single function in isolation
 - ✅ No database setup required (or minimal)
 - ✅ No user/enrollment setup needed
 - ✅ Pure logic testing
 
-### When to add to `attendance_workflow_test.php`:
+### When to add to `integration_workflow_test.php`:
 - ✅ Testing end-to-end workflows
 - ✅ Multi-step business processes
 - ✅ Integration between multiple components
 - ✅ State transitions and timing
 
-### When to add to `security_requirements_test.php`:
+### When to add to `security_test.php`:
 - ✅ Access control validation
 - ✅ Data protection mechanisms
 - ✅ Security constraints
