@@ -356,6 +356,304 @@ class unit_test extends \advanced_testcase {
     }
 
     /**
+     * Test qratt_user_outline function
+     */
+    public function test_qratt_user_outline() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+
+        $qratt = new \stdClass();
+        $qratt->course = $course->id;
+        $qratt->name = 'Test Attendance';
+        $qratt->intro = 'Test';
+        $qratt->introformat = FORMAT_HTML;
+        $qrattid = qratt_add_instance($qratt);
+
+        // Create 5 meetings
+        for ($i = 1; $i <= 5; $i++) {
+            $meeting = new \stdClass();
+            $meeting->qrattid = $qrattid;
+            $meeting->meetingnumber = $i;
+            $meeting->topic = "Meeting $i";
+            $meeting->meetingdate = time();
+            $meeting->status = QRATT_MEETING_ENDED;
+            $meeting->timecreated = time();
+            $meeting->timemodified = time();
+            $meetingid = $DB->insert_record('qratt_meetings', $meeting);
+
+            // User attends 3 out of 5
+            if ($i <= 3) {
+                $attendance = new \stdClass();
+                $attendance->meetingid = $meetingid;
+                $attendance->userid = $user->id;
+                $attendance->status = QRATT_STATUS_PRESENT;
+                $attendance->scantime = time();
+                $attendance->timecreated = time();
+                $attendance->timemodified = time();
+                $DB->insert_record('qratt_attendance', $attendance);
+            }
+        }
+
+        $cm = get_coursemodule_from_instance('qratt', $qrattid, $course->id);
+        $qrattobj = $DB->get_record('qratt', ['id' => $qrattid]);
+
+        $result = qratt_user_outline($course, $user, $cm, $qrattobj);
+
+        $this->assertNotEmpty($result);
+        $this->assertObjectHasProperty('info', $result);
+        $this->assertObjectHasProperty('time', $result);
+        $this->assertStringContainsString('3', $result->info); // 3 present
+        $this->assertStringContainsString('5', $result->info); // out of 5 total
+    }
+
+    /**
+     * Test qratt_user_complete function with meetings
+     */
+    public function test_qratt_user_complete_output() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+
+        $qratt = new \stdClass();
+        $qratt->course = $course->id;
+        $qratt->name = 'Test Attendance';
+        $qratt->intro = 'Test';
+        $qratt->introformat = FORMAT_HTML;
+        $qrattid = qratt_add_instance($qratt);
+
+        // Create meeting with attendance
+        $meeting = new \stdClass();
+        $meeting->qrattid = $qrattid;
+        $meeting->meetingnumber = 1;
+        $meeting->topic = 'Test Meeting';
+        $meeting->meetingdate = time();
+        $meeting->status = QRATT_MEETING_ENDED;
+        $meeting->timecreated = time();
+        $meeting->timemodified = time();
+        $meetingid = $DB->insert_record('qratt_meetings', $meeting);
+
+        $attendance = new \stdClass();
+        $attendance->meetingid = $meetingid;
+        $attendance->userid = $user->id;
+        $attendance->status = QRATT_STATUS_PRESENT;
+        $attendance->scantime = time();
+        $attendance->timecreated = time();
+        $attendance->timemodified = time();
+        $DB->insert_record('qratt_attendance', $attendance);
+
+        $cm = get_coursemodule_from_instance('qratt', $qrattid, $course->id);
+        $qrattobj = $DB->get_record('qratt', ['id' => $qrattid]);
+
+        // Capture output
+        ob_start();
+        qratt_user_complete($course, $user, $cm, $qrattobj);
+        $output = ob_get_clean();
+
+        $this->assertNotEmpty($output);
+        $this->assertStringContainsString('Test Meeting', $output);
+        // Case-insensitive check for 'present'
+        $this->assertMatchesRegularExpression('/present/i', $output);
+    }
+
+    /**
+     * Test qratt_user_complete function with no meetings
+     */
+    public function test_qratt_user_complete_no_meetings() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+
+        $qratt = new \stdClass();
+        $qratt->course = $course->id;
+        $qratt->name = 'Test Attendance';
+        $qratt->intro = 'Test';
+        $qratt->introformat = FORMAT_HTML;
+        $qrattid = qratt_add_instance($qratt);
+
+        $cm = get_coursemodule_from_instance('qratt', $qrattid, $course->id);
+        $qrattobj = $DB->get_record('qratt', ['id' => $qrattid]);
+
+        // Capture output
+        ob_start();
+        qratt_user_complete($course, $user, $cm, $qrattobj);
+        $output = ob_get_clean();
+
+        // Should show no meetings message
+        $this->assertMatchesRegularExpression('/no.*meeting/i', $output);
+    }
+
+    /**
+     * Test qratt_generate_qr_code with invalid meeting ID
+     */
+    public function test_qratt_generate_qr_code_with_invalid_meeting_id() {
+        $this->resetAfterTest(true);
+
+        // Test with negative meeting ID
+        $qrcode = qratt_generate_qr_code(-1, time() + 60);
+        $this->assertNotEmpty($qrcode);
+        $this->assertStringContainsString('meeting=-1', $qrcode);
+    }
+
+    /**
+     * Test qratt_generate_qr_code with past expiry
+     */
+    public function test_qratt_generate_qr_code_with_past_expiry() {
+        $this->resetAfterTest(true);
+
+        // Test with expired timestamp
+        $past = time() - 3600;
+        $qrcode = qratt_generate_qr_code(123, $past);
+        $this->assertNotEmpty($qrcode);
+        // QR code should still generate, validation happens at scan time
+        $this->assertStringContainsString('/mod/qratt/scan.php', $qrcode);
+    }
+
+    /**
+     * Test qratt_get_user_statistics with no meetings
+     */
+    public function test_qratt_get_user_statistics_with_no_meetings() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+
+        $qratt = new \stdClass();
+        $qratt->course = $course->id;
+        $qratt->name = 'Empty Attendance';
+        $qratt->intro = 'Test';
+        $qratt->introformat = FORMAT_HTML;
+        $qrattid = qratt_add_instance($qratt);
+
+        $stats = qratt_get_user_statistics($qrattid, $user->id);
+
+        $this->assertEquals(0, $stats['total']);
+        $this->assertEquals(0, $stats['present']);
+        $this->assertEquals(0, $stats['late']);
+        $this->assertEquals(0, $stats['excused']);
+        $this->assertEquals(0, $stats['absent']);
+        $this->assertEquals(0, $stats['percentage']); // Should handle division by zero
+    }
+
+    /**
+     * Test qratt_get_user_statistics with all attendance statuses
+     */
+    public function test_qratt_get_user_statistics_with_all_statuses() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+
+        $qratt = new \stdClass();
+        $qratt->course = $course->id;
+        $qratt->name = 'Test Attendance';
+        $qratt->intro = 'Test';
+        $qratt->introformat = FORMAT_HTML;
+        $qrattid = qratt_add_instance($qratt);
+
+        // Create 4 meetings with different statuses
+        $statuses = [QRATT_STATUS_PRESENT, QRATT_STATUS_LATE, QRATT_STATUS_EXCUSED, QRATT_STATUS_ABSENT];
+
+        foreach ($statuses as $index => $status) {
+            $meeting = new \stdClass();
+            $meeting->qrattid = $qrattid;
+            $meeting->meetingnumber = $index + 1;
+            $meeting->topic = "Meeting " . ($index + 1);
+            $meeting->meetingdate = time();
+            $meeting->status = QRATT_MEETING_ENDED;
+            $meeting->timecreated = time();
+            $meeting->timemodified = time();
+            $meetingid = $DB->insert_record('qratt_meetings', $meeting);
+
+            // ABSENT doesn't get a record
+            if ($status != QRATT_STATUS_ABSENT) {
+                $attendance = new \stdClass();
+                $attendance->meetingid = $meetingid;
+                $attendance->userid = $user->id;
+                $attendance->status = $status;
+                $attendance->scantime = time();
+                $attendance->timecreated = time();
+                $attendance->timemodified = time();
+                $DB->insert_record('qratt_attendance', $attendance);
+            }
+        }
+
+        $stats = qratt_get_user_statistics($qrattid, $user->id);
+
+        $this->assertEquals(4, $stats['total']);
+        $this->assertEquals(1, $stats['present']);
+        $this->assertEquals(1, $stats['late']);
+        $this->assertEquals(1, $stats['excused']);
+        $this->assertEquals(1, $stats['absent']);
+        $this->assertEquals(25.0, $stats['percentage']); // 1/4 * 100 = 25%
+    }
+
+    /**
+     * Test qratt_filter_students_only with empty array
+     */
+    public function test_qratt_filter_students_only_with_empty_array() {
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $context = \context_course::instance($course->id);
+
+        $result = qratt_filter_students_only([], $context);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test qratt_filter_students_only with mixed user roles
+     */
+    public function test_qratt_filter_students_only_with_mixed_users() {
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $context = \context_course::instance($course->id);
+
+        // Create users with various roles
+        $student1 = $this->getDataGenerator()->create_user();
+        $student2 = $this->getDataGenerator()->create_user();
+        $teacher = $this->getDataGenerator()->create_user();
+        $manager = $this->getDataGenerator()->create_user();
+
+        $this->getDataGenerator()->enrol_user($student1->id, $course->id, 'student');
+        $this->getDataGenerator()->enrol_user($student2->id, $course->id, 'student');
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'teacher');
+        $this->getDataGenerator()->enrol_user($manager->id, $course->id, 'manager');
+
+        $allusers = [$student1, $student2, $teacher, $manager];
+        $filtered = qratt_filter_students_only($allusers, $context);
+
+        $this->assertCount(2, $filtered);
+        $this->assertArrayHasKey($student1->id, $filtered);
+        $this->assertArrayHasKey($student2->id, $filtered);
+        $this->assertArrayNotHasKey($teacher->id, $filtered);
+        $this->assertArrayNotHasKey($manager->id, $filtered);
+    }
+
+    /**
+     * Test qratt_get_institution_logo_url with no logo
+     */
+    public function test_qratt_get_institution_logo_url_no_logo() {
+        $this->resetAfterTest(true);
+
+        $url = qratt_get_institution_logo_url();
+
+        // When no logo is configured, should return null
+        $this->assertNull($url);
+    }
+
+    /**
      * Helper function to wait for a second
      */
     public function waitForSecond() {
