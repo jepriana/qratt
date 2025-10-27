@@ -18,7 +18,7 @@
  * Library of interface functions and constants for module QR Attendance
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -71,7 +71,7 @@ function qratt_supports($feature) {
  * @param mod_qratt_mod_form $mform The form instance
  * @return int The id of the newly inserted qratt record
  */
-function qratt_add_instance(stdClass $qratt, mod_qratt_mod_form $mform = null) {
+function qratt_add_instance(stdClass $qratt, ?mod_qratt_mod_form $mform = null) {
     global $DB;
 
     $qratt->timecreated = time();
@@ -89,7 +89,7 @@ function qratt_add_instance(stdClass $qratt, mod_qratt_mod_form $mform = null) {
  * @param mod_qratt_mod_form $mform The form instance
  * @return boolean Success/Fail
  */
-function qratt_update_instance(stdClass $qratt, mod_qratt_mod_form $mform = null) {
+function qratt_update_instance(stdClass $qratt, ?mod_qratt_mod_form $mform = null) {
     global $DB;
 
     $qratt->timemodified = time();
