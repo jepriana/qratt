@@ -37,7 +37,7 @@ function xmldb_qratt_upgrade($oldversion) {
 
         // Remove foreign key constraint if it exists
         $key = new xmldb_key('qrattid', XMLDB_KEY_FOREIGN, array('qrattid'), 'qratt', array('id'));
-        if ($dbman->key_exists($table, $key)) {
+        if ($dbman->find_key_name($table, $key)) {
             $dbman->drop_key($table, $key);
         }
 
@@ -227,7 +227,7 @@ function xmldb_qratt_upgrade($oldversion) {
 
         // Add foreign key for teacherid
         $key = new xmldb_key('teacherid', XMLDB_KEY_FOREIGN, array('teacherid'), 'user', array('id'));
-        if (!$dbman->key_exists($table, $key)) {
+        if (!$dbman->find_key_name($table, $key)) {
             $dbman->add_key($table, $key);
         }
 

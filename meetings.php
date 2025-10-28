@@ -226,23 +226,6 @@ class meeting_form extends moodleform {
 }
 
 // Output starts here
-echo $OUTPUT->header();
-
-// Conditions to show the intro can change to look for own settings or whatever.
-// if ($qratt->intro) {
-//     echo $OUTPUT->box(format_module_intro('qratt', $qratt, $cm->id), 'generalbox mod_introbox', 'qrattintro');
-// }
-
-// Display navigation tabs
-$tabs = array();
-$tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
-                        get_string('meetings', 'qratt'));
-$tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
-                        get_string('reports', 'qratt'));
-
-echo $OUTPUT->tabtree($tabs, 'meetings');
-
-// No sub-tabs needed - unified meetings view
 
 // Handle different actions
 if ($action == 'add' || $action == 'edit') {
@@ -254,7 +237,7 @@ if ($action == 'add' || $action == 'edit') {
     $mform = new meeting_form(null, array('qratt' => $qratt, 'meeting' => $meeting));
     
     if ($mform->is_cancelled()) {
-        redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')));
+        redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)));
     } else if ($data = $mform->get_data()) {
         if ($meeting) {
             // Update existing meeting
@@ -266,15 +249,15 @@ if ($action == 'add' || $action == 'edit') {
             $meeting->teacherid = $data->teacherid > 0 ? $data->teacherid : null;
             $meeting->timemodified = time();
             
-            // Debug: Log the teacherid being saved
-            if (debugging()) {
+            // Debug: Log the teacherid being saved (CLI only)
+            if (debugging() && CLI_SCRIPT) {
                 mtrace('Updating meeting ID: ' . $meeting->id . ' with teacherid: ' . $meeting->teacherid);
             }
             
             $DB->update_record('qratt_meetings', $meeting);
             
-            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')), 
-                    get_string('meetingupdated', 'qratt'), null, \core\output\notification::NOTIFY_SUCCESS);
+            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                    get_string('meetingupdated', 'qratt'), 0, \core\output\notification::NOTIFY_SUCCESS);
         } else {
             // Create new meeting
             $newmeeting = new stdClass();
@@ -289,17 +272,25 @@ if ($action == 'add' || $action == 'edit') {
             $newmeeting->timecreated = time();
             $newmeeting->timemodified = time();
             
-            // Debug: Log the teacherid being saved
-            if (debugging()) {
+            // Debug: Log the teacherid being saved (CLI only)
+            if (debugging() && CLI_SCRIPT) {
                 mtrace('Creating new meeting with teacherid: ' . $newmeeting->teacherid);
             }
             
             $DB->insert_record('qratt_meetings', $newmeeting);
             
-            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')), 
-                    get_string('meetingcreated', 'qratt'), null, \core\output\notification::NOTIFY_SUCCESS);
+            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                    get_string('meetingcreated', 'qratt'), 0, \core\output\notification::NOTIFY_SUCCESS);
         }
     }
+    
+    echo $OUTPUT->header();
+    $tabs = array();
+    $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                            get_string('meetings', 'qratt'));
+    $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
+                            get_string('reports', 'qratt'));
+    echo $OUTPUT->tabtree($tabs, 'meetings');
     
     echo $OUTPUT->heading($action == 'add' ? get_string('addmeeting', 'qratt') : get_string('editmeeting', 'qratt'));
     
@@ -325,6 +316,14 @@ if ($action == 'add' || $action == 'edit') {
     // Manual attendance input
     require_capability('mod/qratt:manageattendances', $context);
     $meeting = $DB->get_record('qratt_meetings', array('id' => $meetingid, 'qrattid' => $qratt->id), '*', MUST_EXIST);
+    
+    echo $OUTPUT->header();
+    $tabs = array();
+    $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                            get_string('meetings', 'qratt'));
+    $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
+                            get_string('reports', 'qratt'));
+    echo $OUTPUT->tabtree($tabs, 'meetings');
     
     echo $OUTPUT->heading(get_string('manualattendancefor', 'qratt', $meeting->topic), 2);
     
@@ -724,6 +723,14 @@ if ($action == 'add' || $action == 'edit') {
 
 } else {
     // Unified meetings view
+    echo $OUTPUT->header();
+    $tabs = array();
+    $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                            get_string('meetings', 'qratt'));
+    $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
+                            get_string('reports', 'qratt'));
+    echo $OUTPUT->tabtree($tabs, 'meetings');
+    
     echo $OUTPUT->heading(get_string('meetings', 'qratt'), 2);
     
     // Get meetings for this QR Attendance instance
