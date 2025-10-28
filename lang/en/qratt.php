@@ -253,8 +253,10 @@ $string['meetingteacher_help'] = 'Select the teacher who will be conducting this
 $string['selectteacher'] = 'Select teacher';
 
 // Report strings
-$string['studentreport'] = 'Student Report';
-$string['teacherreport'] = 'Lecture Report';
+$string['studentreport'] = 'Student Attendance Report';
+$string['teacherreport'] = 'Lecture Teaching Report';
+$string['printstudentreport'] = 'Student Report';
+$string['printteacherreport'] = 'Lecture Report';
 $string['no'] = 'No.';
 $string['nim'] = 'Student ID';
 $string['fullname'] = 'Full Name';

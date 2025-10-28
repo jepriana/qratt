@@ -835,12 +835,12 @@ if ($action == 'add' || $action == 'edit') {
                 ) .
                 html_writer::link(
                     new moodle_url('/mod/qratt/student_report.php', array('id' => $cm->id)),
-                    get_string('studentreport', 'qratt'),
+                    get_string('printstudentreport', 'qratt'),
                     array('class' => 'btn btn-secondary mr-3', 'target' => '_blank')
                 ) .
                 html_writer::link(
                     new moodle_url('/mod/qratt/teacher_report.php', array('id' => $cm->id)),
-                    get_string('teacherreport', 'qratt'),
+                    get_string('printteacherreport', 'qratt'),
                     array('class' => 'btn btn-secondary', 'target' => '_blank')
                 ),
                 'button-group d-flex flex-wrap align-items-center'

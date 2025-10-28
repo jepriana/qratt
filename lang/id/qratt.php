@@ -253,8 +253,10 @@ $string['meetingteacher_help'] = 'Pilih dosen yang akan mengajar pada pertemuan 
 $string['selectteacher'] = 'Pilih dosen';
 
 // Report strings
-$string['studentreport'] = 'Laporan Mahasiswa';
-$string['teacherreport'] = 'Laporan Dosen';
+$string['studentreport'] = 'Laporan Presensi Mahasiswa';
+$string['teacherreport'] = 'Laporan Mengajar Dosen';
+$string['printstudentreport'] = 'Laporan Mahasiswa';
+$string['printteacherreport'] = 'Laporan Dosen';
 $string['no'] = 'No.';
 $string['nim'] = 'NIM';
 $string['fullname'] = 'Nama Lengkap';
