@@ -29,7 +29,7 @@ require_once(dirname(__FILE__).'/lib.php');
 $id = optional_param('id', 0, PARAM_INT);
 $token = required_param('token', PARAM_RAW);
 $meetingid = required_param('meeting', PARAM_INT);
-$qrurl = optional_param('qr-url', '', PARAM_URL); // Tambahkan untuk form manual
+$qrurl = optional_param('qr-url', '', PARAM_URL); // Tambahkan untuk form manual (kompatibilitas)
 
 // Proses URL dari form manual jika ada
 if (!empty($qrurl)) {
@@ -45,13 +45,24 @@ if (!empty($qrurl)) {
 
 // Validasi dan muat data yang diperlukan
 if (empty($meetingid)) {
-    print_error('invalidmeeting', 'qratt');
+    $PAGE->set_title(get_string('error:meetingnotfound', 'qratt'));
+    echo $OUTPUT->header();
+    echo $OUTPUT->notification(get_string('error:meetingnotfound', 'qratt'), 'notifyproblem');
+    echo $OUTPUT->footer();
+    exit;
 }
 
 require_login();
 
 // Get meeting and validate
-$meeting = $DB->get_record('qratt_meetings', array('id' => $meetingid), '*', MUST_EXIST);
+$meeting = $DB->get_record('qratt_meetings', array('id' => $meetingid));
+if (!$meeting) {
+    $PAGE->set_title(get_string('error:meetingnotfound', 'qratt'));
+    echo $OUTPUT->header();
+    echo $OUTPUT->notification(get_string('error:meetingnotfound', 'qratt'), 'notifyproblem');
+    echo $OUTPUT->footer();
+    exit;
+}
 $qratt = $DB->get_record('qratt', array('id' => $meeting->qrattid), '*', MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $qratt->course), '*', MUST_EXIST);
 
@@ -61,7 +72,11 @@ $cm = get_coursemodule_from_instance('qratt', $qratt->id, $course->id, false, MU
 // Check if user is enrolled in the course
 $context = context_course::instance($course->id);
 if (!is_enrolled($context, $USER->id)) {
-    print_error('notenrolled', 'error', '', $course->fullname);
+    $PAGE->set_title(get_string('scanqr', 'qratt'));
+    echo $OUTPUT->header();
+    echo $OUTPUT->notification(get_string('error:notenrolledincourse', 'qratt', $course->fullname), 'notifyproblem');
+    echo $OUTPUT->footer();
+    exit;
 }
 
 $modulecontext = context_module::instance($cm->id);
@@ -96,8 +111,9 @@ if ($meeting->status != QRATT_MEETING_ACTIVE) {
     exit;
 }
 
-// Check if QR code has expired
-if ($meeting->qrexpiry <= $currenttime) {
+// Time window: token valid only within its 60s lifetime
+$windowstart = $meeting->qrexpiry - 60;
+if ($currenttime > $meeting->qrexpiry || $currenttime < $windowstart) {
     $PAGE->set_title(get_string('qrexpired', 'qratt'));
     echo $OUTPUT->header();
     echo $OUTPUT->notification(get_string('qrexpired', 'qratt'), 'notifyproblem');
@@ -105,22 +121,10 @@ if ($meeting->qrexpiry <= $currenttime) {
     exit;
 }
 
-// Validate token (simple validation - in production, use more secure method)
-$validtoken = false;
-// Use the configured encryption key
+// Validate token against current meeting qrexpiry
 $salt = qratt_get_encryption_key();
-
-// Check current token and previous few tokens to account for refresh timing
-for ($i = 0; $i <= 2; $i++) {
-    $checktimestamp = $meeting->qrexpiry - ($i * 60);
-    $checktoken = md5($meetingid . $checktimestamp . $salt);
-    if (hash_equals($token, $checktoken)) {
-        $validtoken = true;
-        break;
-    }
-}
-
-if (!$validtoken) {
+$expectedtoken = md5($meetingid . $meeting->qrexpiry . $salt);
+if (!hash_equals($token, $expectedtoken)) {
     $PAGE->set_title(get_string('qrinvalid', 'qratt'));
     echo $OUTPUT->header();
     echo $OUTPUT->notification(get_string('qrinvalid', 'qratt'), 'notifyproblem');

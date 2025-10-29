@@ -106,6 +106,7 @@ $string['error:alreadyended'] = 'Meeting has already ended';
 $string['error:rolenotfound'] = 'Student role not found in the system';
 $string['cannotmarkattendance'] = 'Cannot mark attendance. Please try again.';
 $string['onlystudentscanattend'] = 'Only students can mark attendance by scanning QR codes.';
+$string['error:notenrolledincourse'] = 'You are not enrolled in the course "{$a}".';
 
 // Additional strings
 $string['timeremaining'] = 'Time remaining';

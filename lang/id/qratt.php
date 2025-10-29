@@ -106,6 +106,7 @@ $string['error:alreadyended'] = 'Pertemuan telah berakhir';
 $string['error:rolenotfound'] = 'Role mahasiswa tidak ditemukan di sistem';
 $string['cannotmarkattendance'] = 'Tidak dapat mencatat kehadiran. Silakan coba lagi.';
 $string['onlystudentscanattend'] = 'Hanya mahasiswa yang dapat mencatat kehadiran dengan memindai kode QR.';
+$string['error:notenrolledincourse'] = 'Anda tidak terdaftar di mata kuliah "{$a}".';
 
 // Additional strings
 $string['timeremaining'] = 'Waktu tersisa';
