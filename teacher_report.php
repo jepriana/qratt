@@ -215,7 +215,7 @@ header('Content-Type: text/html; charset=utf-8');
         .course-info {
             display: table;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             border: 0px solid #000;
         }
         .course-info-left, .course-info-right {
@@ -242,7 +242,7 @@ header('Content-Type: text/html; charset=utf-8');
         }
         .meetings-table th, .meetings-table td {
             border: 1px solid #000;
-            padding: 8px;
+            padding: 4px;
             text-align: center;
             box-sizing: border-box;
         }
@@ -331,10 +331,10 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
 
     <!-- Separator Line -->
-    <hr style="border: 1px solid #000; margin: 20px 0;">
+    <hr style="border: 1px solid #000; margin: 16px 0;">
     
     <!-- Report Title -->
-    <div style="text-align: center; margin: 20px 0; font-size: 16px; font-weight: bold; text-transform: uppercase; text-decoration: underline;">
+    <div style="text-align: center; margin: 16px 0; font-size: 16px; font-weight: bold; text-transform: uppercase; text-decoration: underline;">
         <?php echo get_string('teacherreport', 'qratt'); ?>
     </div>
 
