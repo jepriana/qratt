@@ -18,7 +18,7 @@
  * Meeting management and overview for QR Attendance
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -166,10 +166,24 @@ class meeting_form extends moodleform {
         
         $mform->addElement('date_time_selector', 'meetingdate', get_string('meetingdate', 'qratt'));
         
+        $mform->addElement('text', 'location', get_string('location', 'qratt'), array('size' => 60));
+        $mform->setType('location', PARAM_TEXT);
+        
         $mform->addElement('duration', 'activeduration', get_string('activeduration', 'qratt'), 
                           array('defaultunit' => MINSECS, 'optional' => false));
         $mform->addHelpButton('activeduration', 'activeduration', 'qratt');
         $mform->setDefault('activeduration', 1800); // 30 minutes default
+        
+        // Teacher selection
+        global $DB;
+        $context = context_course::instance($this->_customdata['qratt']->course);
+        $teachers = get_enrolled_users($context, 'mod/qratt:manage', 0, 'u.id, u.firstname, u.lastname', 'u.lastname, u.firstname');
+        $teacheroptions = array(0 => get_string('selectteacher', 'qratt'));
+        foreach ($teachers as $teacher) {
+            $teacheroptions[$teacher->id] = fullname($teacher);
+        }
+        $mform->addElement('select', 'teacherid', get_string('meetingteacher', 'qratt'), $teacheroptions);
+        $mform->addHelpButton('teacherid', 'meetingteacher', 'qratt');
         
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
@@ -193,12 +207,17 @@ class meeting_form extends moodleform {
         $meeting = $this->_customdata['meeting'];
         
         // Check if meeting number already exists (for new meetings or when changing meeting number)
-        $conditions = array('qrattid' => $qratt->id, 'meetingnumber' => $data['meetingnumber']);
         if ($meeting) {
-            $conditions['id'] = array('!=', $meeting->id);  // Exclude current meeting when editing
+            // For editing: check if another meeting has the same number
+            $sql = "SELECT id FROM {qratt_meetings} WHERE qrattid = ? AND meetingnumber = ? AND id != ?";
+            $params = array($qratt->id, $data['meetingnumber'], $meeting->id);
+        } else {
+            // For new meetings: check if meeting number exists
+            $sql = "SELECT id FROM {qratt_meetings} WHERE qrattid = ? AND meetingnumber = ?";
+            $params = array($qratt->id, $data['meetingnumber']);
         }
         
-        if ($DB->record_exists('qratt_meetings', $conditions)) {
+        if ($DB->record_exists_sql($sql, $params)) {
             $errors['meetingnumber'] = get_string('meetingnumberexists', 'qratt');
         }
         
@@ -207,23 +226,6 @@ class meeting_form extends moodleform {
 }
 
 // Output starts here
-echo $OUTPUT->header();
-
-// Conditions to show the intro can change to look for own settings or whatever.
-// if ($qratt->intro) {
-//     echo $OUTPUT->box(format_module_intro('qratt', $qratt, $cm->id), 'generalbox mod_introbox', 'qrattintro');
-// }
-
-// Display navigation tabs
-$tabs = array();
-$tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
-                        get_string('meetings', 'qratt'));
-$tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
-                        get_string('reports', 'qratt'));
-
-echo $OUTPUT->tabtree($tabs, 'meetings');
-
-// No sub-tabs needed - unified meetings view
 
 // Handle different actions
 if ($action == 'add' || $action == 'edit') {
@@ -235,19 +237,27 @@ if ($action == 'add' || $action == 'edit') {
     $mform = new meeting_form(null, array('qratt' => $qratt, 'meeting' => $meeting));
     
     if ($mform->is_cancelled()) {
-        redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')));
+        redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)));
     } else if ($data = $mform->get_data()) {
         if ($meeting) {
             // Update existing meeting
             $meeting->meetingnumber = (int)$data->meetingnumber;
             $meeting->topic = $data->topic;
             $meeting->meetingdate = $data->meetingdate;
+            $meeting->location = $data->location;
+            $meeting->activeduration = $data->activeduration;
+            $meeting->teacherid = $data->teacherid > 0 ? $data->teacherid : null;
             $meeting->timemodified = time();
+            
+            // Debug: Log the teacherid being saved (CLI only)
+            if (debugging() && CLI_SCRIPT) {
+                mtrace('Updating meeting ID: ' . $meeting->id . ' with teacherid: ' . $meeting->teacherid);
+            }
             
             $DB->update_record('qratt_meetings', $meeting);
             
-            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')), 
-                    get_string('meetingupdated', 'qratt'), null, \core\output\notification::NOTIFY_SUCCESS);
+            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                    get_string('meetingupdated', 'qratt'), 0, \core\output\notification::NOTIFY_SUCCESS);
         } else {
             // Create new meeting
             $newmeeting = new stdClass();
@@ -255,16 +265,32 @@ if ($action == 'add' || $action == 'edit') {
             $newmeeting->meetingnumber = (int)$data->meetingnumber;
             $newmeeting->topic = $data->topic;
             $newmeeting->meetingdate = $data->meetingdate;
+            $newmeeting->location = $data->location;
+            $newmeeting->activeduration = $data->activeduration;
+            $newmeeting->teacherid = $data->teacherid > 0 ? $data->teacherid : null;
             $newmeeting->status = QRATT_MEETING_INACTIVE;
             $newmeeting->timecreated = time();
             $newmeeting->timemodified = time();
             
+            // Debug: Log the teacherid being saved (CLI only)
+            if (debugging() && CLI_SCRIPT) {
+                mtrace('Creating new meeting with teacherid: ' . $newmeeting->teacherid);
+            }
+            
             $DB->insert_record('qratt_meetings', $newmeeting);
             
-            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'manage')), 
-                    get_string('meetingcreated', 'qratt'), null, \core\output\notification::NOTIFY_SUCCESS);
+            redirect(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                    get_string('meetingcreated', 'qratt'), 0, \core\output\notification::NOTIFY_SUCCESS);
         }
     }
+    
+    echo $OUTPUT->header();
+    $tabs = array();
+    $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                            get_string('meetings', 'qratt'));
+    $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
+                            get_string('reports', 'qratt'));
+    echo $OUTPUT->tabtree($tabs, 'meetings');
     
     echo $OUTPUT->heading($action == 'add' ? get_string('addmeeting', 'qratt') : get_string('editmeeting', 'qratt'));
     
@@ -275,7 +301,10 @@ if ($action == 'add' || $action == 'edit') {
             'meetingid' => $meeting->id,
             'meetingnumber' => $meeting->meetingnumber,
             'topic' => $meeting->topic,
-            'meetingdate' => $meeting->meetingdate
+            'meetingdate' => $meeting->meetingdate,
+            'location' => $meeting->location,
+            'activeduration' => $meeting->activeduration,
+            'teacherid' => $meeting->teacherid
         ));
     } else {
         $mform->set_data(array('id' => $cm->id, 'action' => 'add'));
@@ -288,13 +317,22 @@ if ($action == 'add' || $action == 'edit') {
     require_capability('mod/qratt:manageattendances', $context);
     $meeting = $DB->get_record('qratt_meetings', array('id' => $meetingid, 'qrattid' => $qratt->id), '*', MUST_EXIST);
     
+    echo $OUTPUT->header();
+    $tabs = array();
+    $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                            get_string('meetings', 'qratt'));
+    $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
+                            get_string('reports', 'qratt'));
+    echo $OUTPUT->tabtree($tabs, 'meetings');
+    
     echo $OUTPUT->heading(get_string('manualattendancefor', 'qratt', $meeting->topic), 2);
     
     // Meeting information
     echo html_writer::div(
         html_writer::tag('strong', get_string('meetingnumber', 'qratt') . ': ') . $meeting->meetingnumber . html_writer::empty_tag('br') .
         html_writer::tag('strong', get_string('topic', 'qratt') . ': ') . $meeting->topic . html_writer::empty_tag('br') .
-        html_writer::tag('strong', get_string('date', 'qratt') . ': ') . userdate($meeting->meetingdate),
+        html_writer::tag('strong', get_string('date', 'qratt') . ': ') . userdate($meeting->meetingdate) . html_writer::empty_tag('br') .
+        ($meeting->location ? html_writer::tag('strong', get_string('location', 'qratt') . ': ') . $meeting->location : ''),
         'meeting-info mb-3 p-3 bg-light border-left-primary'
     );
     
@@ -309,7 +347,10 @@ if ($action == 'add' || $action == 'edit') {
     // Get users enrolled with student role only
     $students = get_enrolled_users($context, 'mod/qratt:canbelisted', 0, 
                                  'u.id, u.firstname, u.lastname, u.email', 
-                                 'u.lastname, u.firstname', 0, '', '', '', 0, $studentrole->id);
+                                 'u.lastname, u.firstname');
+    
+    // Filter to ensure only students (not teachers) are included
+    $students = qratt_filter_students_only($students, $context);
     
     if (!$students) {
         echo $OUTPUT->notification(get_string('nostudents', 'qratt'), 'notifymessage');
@@ -682,6 +723,14 @@ if ($action == 'add' || $action == 'edit') {
 
 } else {
     // Unified meetings view
+    echo $OUTPUT->header();
+    $tabs = array();
+    $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
+                            get_string('meetings', 'qratt'));
+    $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
+                            get_string('reports', 'qratt'));
+    echo $OUTPUT->tabtree($tabs, 'meetings');
+    
     echo $OUTPUT->heading(get_string('meetings', 'qratt'), 2);
     
     // Get meetings for this QR Attendance instance
@@ -699,6 +748,7 @@ if ($action == 'add' || $action == 'edit') {
             get_string('meetingnumber', 'qratt'),
             get_string('topic', 'qratt'),
             get_string('date', 'qratt'),
+            get_string('location', 'qratt'),
             get_string('status', 'qratt'),
             get_string('actions', 'qratt')
         );
@@ -767,6 +817,7 @@ if ($action == 'add' || $action == 'edit') {
                 $meeting->meetingnumber,
                 $meeting->topic,
                 userdate($meeting->meetingdate),
+                $meeting->location ?: '-',
                 html_writer::span($statustext, 'meeting-status ' . $statusclass),
                 implode(' ', $actions)
             );
@@ -774,11 +825,27 @@ if ($action == 'add' || $action == 'edit') {
         
         echo html_writer::table($table);
         
-        // Add meeting button
+        // Add meeting button and report buttons in horizontal layout
         echo html_writer::div(
-            $OUTPUT->single_button(new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'add')), 
-                                 get_string('addmeeting', 'qratt'), 'get'),
-            'add-meeting-button mt-3'
+            html_writer::div(
+                html_writer::link(
+                    new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id, 'action' => 'add')),
+                    get_string('addmeeting', 'qratt'),
+                    array('class' => 'btn btn-primary mr-3')
+                ) .
+                html_writer::link(
+                    new moodle_url('/mod/qratt/student_report.php', array('id' => $cm->id)),
+                    get_string('printstudentreport', 'qratt'),
+                    array('class' => 'btn btn-secondary mr-3', 'target' => '_blank')
+                ) .
+                html_writer::link(
+                    new moodle_url('/mod/qratt/teacher_report.php', array('id' => $cm->id)),
+                    get_string('printteacherreport', 'qratt'),
+                    array('class' => 'btn btn-secondary', 'target' => '_blank')
+                ),
+                'button-group d-flex flex-wrap align-items-center'
+            ),
+            'action-buttons mt-3'
         );
     }
 }

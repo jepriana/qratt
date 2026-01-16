@@ -18,7 +18,7 @@
  * Database upgrade script for QR Attendance plugin
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -37,7 +37,7 @@ function xmldb_qratt_upgrade($oldversion) {
 
         // Remove foreign key constraint if it exists
         $key = new xmldb_key('qrattid', XMLDB_KEY_FOREIGN, array('qrattid'), 'qratt', array('id'));
-        if ($dbman->key_exists($table, $key)) {
+        if ($dbman->find_key_name($table, $key)) {
             $dbman->drop_key($table, $key);
         }
 
@@ -125,6 +125,114 @@ function xmldb_qratt_upgrade($oldversion) {
 
         // Savepoint reached
         upgrade_mod_savepoint(true, 2024063001, 'qratt');
+    }
+
+    // Add location and activeduration fields to qratt_meetings table
+    if ($oldversion < 2024063008) {
+        $table = new xmldb_table('qratt_meetings');
+
+        // Add location field
+        $field = new xmldb_field('location', XMLDB_TYPE_TEXT, null, null, null, null, null, 'endtime');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add activeduration field with default 30 minutes (1800 seconds)
+        $field = new xmldb_field('activeduration', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1800', 'location');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Savepoint reached
+        upgrade_mod_savepoint(true, 2024063008, 'qratt');
+    }
+
+    // Add course information fields to qratt table
+    if ($oldversion < 2024063010) {
+        $table = new xmldb_table('qratt');
+
+        // Add semester field
+        $field = new xmldb_field('semester', XMLDB_TYPE_CHAR, '50', null, null, null, null, 'introformat');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add department field (Jurusan)
+        $field = new xmldb_field('department', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'semester');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add study program field (Program Studi)
+        $field = new xmldb_field('studyprogram', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'department');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add subject field (Mata Kuliah)
+        $field = new xmldb_field('subject', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'studyprogram');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add credits field (SKS)
+        $field = new xmldb_field('credits', XMLDB_TYPE_INTEGER, '2', null, null, null, null, 'subject');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add class name field (Kelas)
+        $field = new xmldb_field('classname', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'credits');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add lecturer field (Dosen)
+        $field = new xmldb_field('lecturer', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'classname');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add day of week field (Hari)
+        $field = new xmldb_field('dayofweek', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'lecturer');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add schedule time field (Pukul)
+        $field = new xmldb_field('scheduletime', XMLDB_TYPE_CHAR, '50', null, null, null, null, 'dayofweek');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add room field (Ruang)
+        $field = new xmldb_field('room', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'scheduletime');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Savepoint reached
+        upgrade_mod_savepoint(true, 2024063010, 'qratt');
+    }
+
+    // Add teacherid field to qratt_meetings table
+    if ($oldversion < 2025101602) {
+        $table = new xmldb_table('qratt_meetings');
+
+        // Add teacherid field
+        $field = new xmldb_field('teacherid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'activeduration');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add foreign key for teacherid
+        $key = new xmldb_key('teacherid', XMLDB_KEY_FOREIGN, array('teacherid'), 'user', array('id'));
+        if (!$dbman->find_key_name($table, $key)) {
+            $dbman->add_key($table, $key);
+        }
+
+        // Savepoint reached
+        upgrade_mod_savepoint(true, 2025101602, 'qratt');
     }
 
     return true;

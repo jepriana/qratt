@@ -18,28 +18,28 @@
  * Indonesian strings for qratt
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['modulename'] = 'Absensi QR';
-$string['modulenameplural'] = 'Absensi QR';
-$string['modulename_help'] = 'Gunakan modul Absensi QR untuk melacak kehadiran mahasiswa menggunakan kode QR. Dosen dapat membuat pertemuan dan menghasilkan kode QR yang dipindai mahasiswa untuk menandai kehadiran mereka.';
-$string['qratt:addinstance'] = 'Tambah Absensi QR baru';
-$string['qratt:view'] = 'Lihat Absensi QR';
-$string['qratt:manage'] = 'Kelola Absensi QR';
-$string['qratt:takeattendance'] = 'Ambil absensi';
-$string['qratt:viewreports'] = 'Lihat laporan absensi';
-$string['qratt:manageattendances'] = 'Kelola catatan absensi';
-$string['qratt:canbelisted'] = 'Dapat terdaftar dalam absensi';
+$string['modulename'] = 'Presensi QR';
+$string['modulenameplural'] = 'Presensi QR';
+$string['modulename_help'] = 'Gunakan modul Presensi QR untuk melacak kehadiran mahasiswa menggunakan kode QR. Dosen dapat membuat pertemuan dan menghasilkan kode QR yang dipindai mahasiswa untuk menandai kehadiran mereka.';
+$string['qratt:addinstance'] = 'Tambah Presensi QR baru';
+$string['qratt:view'] = 'Lihat Presensi QR';
+$string['qratt:manage'] = 'Kelola Presensi QR';
+$string['qratt:takeattendance'] = 'Catat kehadiran';
+$string['qratt:viewreports'] = 'Lihat laporan presensi';
+$string['qratt:manageattendances'] = 'Kelola catatan presensi';
+$string['qratt:canbelisted'] = 'Dapat terdaftar dalam presensi';
 $string['qrattfieldset'] = 'Fieldset contoh kustom';
-$string['qrattname'] = 'Nama Absensi QR';
+$string['qrattname'] = 'Nama Presensi QR';
 $string['qrattname_help'] = 'Ini adalah konten tooltip bantuan yang terkait dengan field qrattname. Sintaks Markdown didukung.';
 $string['qratt'] = 'qratt';
-$string['pluginadministration'] = 'Administrasi Absensi QR';
-$string['pluginname'] = 'Absensi QR';
+$string['pluginadministration'] = 'Administrasi Presensi QR';
+$string['pluginname'] = 'Presensi QR';
 
 // Navigation
 $string['overview'] = 'Ringkasan';
@@ -53,6 +53,7 @@ $string['deleteemeeting'] = 'Hapus pertemuan';
 $string['meetingnumber'] = 'Nomor pertemuan';
 $string['topic'] = 'Topik';
 $string['date'] = 'Tanggal';
+$string['location'] = 'Lokasi';
 $string['status'] = 'Status';
 $string['actions'] = 'Aksi';
 $string['yourstatus'] = 'Status Anda';
@@ -71,7 +72,7 @@ $string['excused'] = 'Izin';
 
 // Messages
 $string['nomeetings'] = 'Belum ada pertemuan yang dibuat.';
-$string['nomeetingsinfo'] = 'Untuk mulai mengambil absensi, Anda perlu membuat pertemuan terlebih dahulu.';
+$string['nomeetingsinfo'] = 'Untuk mulai mengambil presensi, Anda perlu membuat pertemuan terlebih dahulu.';
 $string['attendancerecord'] = 'Hadir {$a->present} dari {$a->total} pertemuan';
 $string['attendancesummary'] = 'Ringkasan Kehadiran';
 $string['totalmeetings'] = 'Total pertemuan';
@@ -94,16 +95,18 @@ $string['meetingdate'] = 'Tanggal pertemuan';
 $string['exitfullscreen'] = 'Keluar Layar Penuh';
 $string['meetingtopic'] = 'Topik pertemuan';
 $string['duration'] = 'Durasi (menit)';
-$string['activeduration'] = 'Durasi aktif (menit)';
-$string['activeduration_help'] = 'Berapa lama kode QR harus tetap aktif untuk dipindai';
+$string['activeduration'] = 'Durasi aktif';
+$string['activeduration_help'] = 'Berapa lama setelah waktu mulai pertemuan mahasiswa masih dapat ditandai sebagai Hadir. Setelah durasi ini, pemindaian terlambat akan ditandai sebagai status Terlambat.';
 
 // Errors
 $string['error:meetingnotfound'] = 'Pertemuan tidak ditemukan';
 $string['error:cannotactivate'] = 'Tidak dapat mengaktifkan pertemuan';
 $string['error:meetingnotactive'] = 'Pertemuan tidak aktif';
-$string['error:alreadyended'] = 'Pertemuan sudah berakhir';
-$string['error:rolenotfound'] = 'Peran mahasiswa tidak ditemukan dalam sistem';
-$string['cannotmarkattendance'] = 'Tidak dapat menandai kehadiran. Silakan coba lagi.';
+$string['error:alreadyended'] = 'Pertemuan telah berakhir';
+$string['error:rolenotfound'] = 'Role mahasiswa tidak ditemukan di sistem';
+$string['cannotmarkattendance'] = 'Tidak dapat mencatat kehadiran. Silakan coba lagi.';
+$string['onlystudentscanattend'] = 'Hanya mahasiswa yang dapat mencatat kehadiran dengan memindai kode QR.';
+$string['error:notenrolledincourse'] = 'Anda tidak terdaftar di mata kuliah "{$a}".';
 
 // Additional strings
 $string['timeremaining'] = 'Waktu tersisa';
@@ -138,6 +141,7 @@ $string['totalpresent'] = 'Total hadir';
 $string['totalabsent'] = 'Total tidak hadir';
 $string['percentage'] = 'Persentase';
 $string['downloadcsv'] = 'Unduh CSV';
+$string['reportdate'] = 'Tanggal Laporan';
 
 // Scanner functionality
 $string['scanqrcode'] = 'Pindai Kode QR';
@@ -167,12 +171,107 @@ $string['meetingsoverview'] = 'Ringkasan Pertemuan';
 $string['bulkselection'] = 'Pilihan Massal';
 $string['bulkselectionhelp'] = 'Pilih status kehadiran di bawah ini untuk mengatur semua mahasiswa ke status tersebut sekaligus. Anda kemudian dapat memodifikasi mahasiswa individu sesuai kebutuhan.';
 
+// Admin Settings
+$string['securitysettings'] = 'Pengaturan Keamanan';
+$string['securitysettings_desc'] = 'Konfigurasi pengaturan keamanan untuk pembuatan dan validasi kode QR.';
+$string['encryptionkey'] = 'Kunci Enkripsi Kode QR';
+$string['encryptionkey_desc'] = 'Kunci enkripsi yang digunakan untuk pembuatan dan validasi token kode QR. Kosongkan untuk menggunakan kunci sistem default. Mengubah kunci ini akan membuat kode QR yang ada tidak valid.';
+
+$string['institutionsettings'] = 'Informasi Institusi';
+$string['institutionsettings_desc'] = 'Konfigurasi informasi institusi yang akan disertakan dalam laporan absensi.';
+$string['institutionname'] = 'Nama Institusi';
+$string['institutionname_desc'] = 'Nama institusi pendidikan';
+$string['institutionaddress'] = 'Alamat Institusi';
+$string['institutionaddress_desc'] = 'Alamat lengkap institusi';
+$string['institutionphone'] = 'Telepon Institusi';
+$string['institutionphone_desc'] = 'Nomor telepon institusi';
+$string['institutionfax'] = 'Fax Institusi';
+$string['institutionfax_desc'] = 'Nomor fax institusi';
+$string['institutionlogo'] = 'Logo Institusi';
+$string['institutionlogo_desc'] = 'Upload logo institusi untuk digunakan dalam laporan. Format yang didukung: PNG, JPG, JPEG, GIF';
+
+$string['reportsettings'] = 'Pengaturan Laporan';
+$string['reportsettings_desc'] = 'Konfigurasi informasi apa yang akan disertakan dalam laporan absensi.';
+$string['includelogoinreports'] = 'Sertakan Logo dalam Laporan';
+$string['includelogoinreports_desc'] = 'Sertakan logo institusi dalam laporan yang dibuat';
+$string['includeaddressinreports'] = 'Sertakan Alamat dalam Laporan';
+$string['includeaddressinreports_desc'] = 'Sertakan alamat institusi dalam laporan yang dibuat';
+$string['includewebsiteinreports'] = 'Sertakan Website dalam Laporan';
+$string['includewebsiteinreports_desc'] = 'Sertakan website institusi dalam laporan yang dibuat';
+$string['includeemailinreports'] = 'Sertakan Email dalam Laporan';
+$string['includeemailinreports_desc'] = 'Sertakan email institusi dalam laporan yang dibuat';
+$string['includecityinreports'] = 'Sertakan Kota dalam Laporan';
+$string['includecityinreports_desc'] = 'Sertakan kota institusi dalam footer laporan';
+$string['includephoneinreports'] = 'Sertakan Telepon dalam Laporan';
+$string['includephoneinreports_desc'] = 'Sertakan nomor telepon institusi dalam laporan yang dibuat';
+$string['includefaxinreports'] = 'Sertakan Fax dalam Laporan';
+$string['includefaxinreports_desc'] = 'Sertakan nomor fax institusi dalam laporan yang dibuat';
+
+// Institution fields
+$string['institutioncity'] = 'Kota Institusi';
+$string['institutioncity_desc'] = 'Kota tempat institusi berada';
+$string['institutionwebsite'] = 'Website Institusi';
+$string['institutionwebsite_desc'] = 'URL website institusi';
+$string['institutionemail'] = 'Email Institusi';
+$string['institutionemail_desc'] = 'Alamat email resmi institusi';
+
+// Course information fields
+$string['courseinformation'] = 'Informasi Mata Kuliah';
+$string['semester'] = 'Semester';
+$string['semester_help'] = 'Semester atau periode akademik (misalnya: Genap 2024, Ganjil 2024)';
+$string['department'] = 'Jurusan';
+$string['department_help'] = 'Jurusan atau fakultas yang menawarkan mata kuliah ini';
+$string['studyprogram'] = 'Program Studi';
+$string['studyprogram_help'] = 'Program studi atau jurusan yang terkait dengan mata kuliah ini';
+$string['subject'] = 'Mata Kuliah';
+$string['subject_help'] = 'Nama mata kuliah';
+$string['credits'] = 'SKS';
+$string['credits_help'] = 'Jumlah satuan kredit semester untuk mata kuliah ini';
+$string['classname'] = 'Kelas';
+$string['classname_help'] = 'Nama kelas atau seksi (misalnya: A, B, Pagi, Sore)';
+$string['lecturer'] = 'Dosen';
+$string['lecturer_help'] = 'Nama dosen pengampu';
+$string['dayofweek'] = 'Hari';
+$string['dayofweek_help'] = 'Hari dalam seminggu ketika kelas ini dijadwalkan';
+$string['scheduletime'] = 'Pukul';
+$string['scheduletime_help'] = 'Waktu ketika kelas ini dijadwalkan (misalnya: 08:00-10:00)';
+$string['room'] = 'Ruang';
+$string['room_help'] = 'Ruang kelas atau lokasi tempat kelas ini berlangsung';
+
+// Days of the week
+$string['selectday'] = 'Pilih hari';
+$string['monday'] = 'Senin';
+$string['tuesday'] = 'Selasa';
+$string['wednesday'] = 'Rabu';
+$string['thursday'] = 'Kamis';
+$string['friday'] = 'Jumat';
+$string['saturday'] = 'Sabtu';
+$string['sunday'] = 'Minggu';
+
+// Meeting teacher
+$string['meetingteacher'] = 'Dosen Pertemuan';
+$string['meetingteacher_help'] = 'Pilih dosen yang akan mengajar pada pertemuan ini';
+$string['selectteacher'] = 'Pilih dosen';
+
+// Report strings
+$string['studentreport'] = 'Laporan Presensi Mahasiswa';
+$string['teacherreport'] = 'Laporan Mengajar Dosen';
+$string['printstudentreport'] = 'Laporan Mahasiswa';
+$string['printteacherreport'] = 'Laporan Dosen';
+$string['no'] = 'No.';
+$string['nim'] = 'NIM';
+$string['fullname'] = 'Nama Lengkap';
+$string['numberpresent'] = 'Jumlah Hadir';
+$string['numberabsent'] = 'Jumlah Tidak Hadir';
+$string['print'] = 'Cetak';
+$string['lecturer_in_charge'] = 'Dosen Pengampu';
+
 // Events
-$string['eventcoursemoduleviewed'] = 'Modul Absensi QR dilihat';
+$string['eventcoursemoduleviewed'] = 'Modul Presensi QR dilihat';
 
 // Privacy
-$string['privacy:metadata'] = 'Plugin Absensi QR menyimpan data kehadiran untuk pengguna.';
-$string['privacy:metadata:qratt_attendance'] = 'Informasi tentang kehadiran pengguna dalam aktivitas Absensi QR.';
+$string['privacy:metadata'] = 'Plugin Presensi QR menyimpan data kehadiran untuk pengguna.';
+$string['privacy:metadata:qratt_attendance'] = 'Informasi tentang kehadiran pengguna dalam aktivitas Presensi QR.';
 $string['privacy:metadata:qratt_attendance:userid'] = 'ID pengguna yang kehadirannya sedang dicatat.';
 $string['privacy:metadata:qratt_attendance:status'] = 'Status kehadiran pengguna untuk pertemuan.';
 $string['privacy:metadata:qratt_attendance:scantime'] = 'Waktu ketika pengguna memindai kode QR.';

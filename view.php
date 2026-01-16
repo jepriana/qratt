@@ -18,7 +18,7 @@
  * Prints a particular instance of qratt
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -79,8 +79,6 @@ $tabs[] = new tabobject('view', new moodle_url('/mod/qratt/view.php', array('id'
 if ($canmanage) {
     $tabs[] = new tabobject('meetings', new moodle_url('/mod/qratt/meetings.php', array('id' => $cm->id)), 
                             get_string('meetings', 'qratt'));
-    $tabs[] = new tabobject('attendance', new moodle_url('/mod/qratt/attendance.php', array('id' => $cm->id)), 
-                            get_string('manualattendance', 'qratt'));
     $tabs[] = new tabobject('reports', new moodle_url('/mod/qratt/reports.php', array('id' => $cm->id)), 
                             get_string('reports', 'qratt'));
 }

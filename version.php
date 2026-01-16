@@ -18,13 +18,13 @@
  * Version information for QR Attendance module
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024063007;    // The current module version (Date: YYYYMMDDXX).
+$plugin->version   = 2025120201;    // The current module version (Date: YYYYMMDDXX).
 $plugin->requires  = 2022090200;    // 2024042200;        // Requires Moodle 4.5.
 $plugin->component = 'mod_qratt';   // Full name of the plugin (used for diagnostics).
 $plugin->maturity  = MATURITY_STABLE;

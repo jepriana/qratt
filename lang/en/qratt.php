@@ -18,7 +18,7 @@
  * English strings for qratt
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -53,6 +53,7 @@ $string['deleteemeeting'] = 'Delete meeting';
 $string['meetingnumber'] = 'Meeting number';
 $string['topic'] = 'Topic';
 $string['date'] = 'Date';
+$string['location'] = 'Location';
 $string['status'] = 'Status';
 $string['actions'] = 'Actions';
 $string['yourstatus'] = 'Your status';
@@ -94,8 +95,8 @@ $string['meetingdate'] = 'Meeting date';
 $string['exitfullscreen'] = 'Exit Full Screen';
 $string['meetingtopic'] = 'Meeting topic';
 $string['duration'] = 'Duration (minutes)';
-$string['activeduration'] = 'Active duration (minutes)';
-$string['activeduration_help'] = 'How long the QR code should remain active for scanning';
+$string['activeduration'] = 'Active duration';
+$string['activeduration_help'] = 'How long after the meeting start time students can still be marked as Present. After this duration, late scans will be marked as Late status.';
 
 // Errors
 $string['error:meetingnotfound'] = 'Meeting not found';
@@ -104,6 +105,8 @@ $string['error:meetingnotactive'] = 'Meeting is not active';
 $string['error:alreadyended'] = 'Meeting has already ended';
 $string['error:rolenotfound'] = 'Student role not found in the system';
 $string['cannotmarkattendance'] = 'Cannot mark attendance. Please try again.';
+$string['onlystudentscanattend'] = 'Only students can mark attendance by scanning QR codes.';
+$string['error:notenrolledincourse'] = 'You are not enrolled in the course "{$a}".';
 
 // Additional strings
 $string['timeremaining'] = 'Time remaining';
@@ -138,6 +141,7 @@ $string['totalpresent'] = 'Total present';
 $string['totalabsent'] = 'Total absent';
 $string['percentage'] = 'Percentage';
 $string['downloadcsv'] = 'Download CSV';
+$string['reportdate'] = 'Report Date';
 
 // Scanner functionality
 $string['scanqrcode'] = 'Scan QR Code';
@@ -166,6 +170,101 @@ $string['managemeetings'] = 'Manage Meetings';
 $string['meetingsoverview'] = 'Meetings Overview';
 $string['bulkselection'] = 'Bulk Selection';
 $string['bulkselectionhelp'] = 'Select an attendance status below to set all students to that status at once. You can then modify individual students as needed.';
+
+// Admin Settings
+$string['securitysettings'] = 'Security Settings';
+$string['securitysettings_desc'] = 'Configure security settings for QR code generation and validation.';
+$string['encryptionkey'] = 'QR Code Encryption Key';
+$string['encryptionkey_desc'] = 'Encryption key used for QR code token generation and validation. Leave empty to use default system key. Changing this key will invalidate existing QR codes.';
+
+$string['institutionsettings'] = 'Institution Information';
+$string['institutionsettings_desc'] = 'Configure institution information to be included in attendance reports.';
+$string['institutionname'] = 'Institution Name';
+$string['institutionname_desc'] = 'Name of the educational institution';
+$string['institutionaddress'] = 'Institution Address';
+$string['institutionaddress_desc'] = 'Complete address of the institution';
+$string['institutionphone'] = 'Institution Phone';
+$string['institutionphone_desc'] = 'Phone number of the institution';
+$string['institutionfax'] = 'Institution Fax';
+$string['institutionfax_desc'] = 'Fax number of the institution';
+$string['institutionlogo'] = 'Institution Logo';
+$string['institutionlogo_desc'] = 'Upload institution logo to be used in reports. Supported formats: PNG, JPG, JPEG, GIF';
+
+$string['reportsettings'] = 'Report Settings';
+$string['reportsettings_desc'] = 'Configure what information to include in attendance reports.';
+$string['includelogoinreports'] = 'Include Logo in Reports';
+$string['includelogoinreports_desc'] = 'Include institution logo in generated reports';
+$string['includeaddressinreports'] = 'Include Address in Reports';
+$string['includeaddressinreports_desc'] = 'Include institution address in generated reports';
+$string['includewebsiteinreports'] = 'Include Website in Reports';
+$string['includewebsiteinreports_desc'] = 'Include institution website in generated reports';
+$string['includeemailinreports'] = 'Include Email in Reports';
+$string['includeemailinreports_desc'] = 'Include institution email in generated reports';
+$string['includecityinreports'] = 'Include City in Reports';
+$string['includecityinreports_desc'] = 'Include institution city in report footers';
+$string['includephoneinreports'] = 'Include Phone in Reports';
+$string['includephoneinreports_desc'] = 'Include institution phone number in generated reports';
+$string['includefaxinreports'] = 'Include Fax in Reports';
+$string['includefaxinreports_desc'] = 'Include institution fax number in generated reports';
+
+// Institution fields
+$string['institutioncity'] = 'Institution City';
+$string['institutioncity_desc'] = 'City where the institution is located';
+$string['institutionwebsite'] = 'Institution Website';
+$string['institutionwebsite_desc'] = 'Website URL of the institution';
+$string['institutionemail'] = 'Institution Email';
+$string['institutionemail_desc'] = 'Official email address of the institution';
+
+// Course information fields
+$string['courseinformation'] = 'Course Information';
+$string['semester'] = 'Semester';
+$string['semester_help'] = 'Academic semester or term (e.g., Fall 2024, Spring 2024)';
+$string['department'] = 'Department';
+$string['department_help'] = 'Department or faculty offering this course';
+$string['studyprogram'] = 'Study Program';
+$string['studyprogram_help'] = 'Study program or major associated with this course';
+$string['subject'] = 'Subject';
+$string['subject_help'] = 'Subject or course name';
+$string['credits'] = 'Credits (SKS)';
+$string['credits_help'] = 'Number of credit hours for this course';
+$string['classname'] = 'Class';
+$string['classname_help'] = 'Class name or section (e.g., A, B, Morning, Evening)';
+$string['lecturer'] = 'Lecturer';
+$string['lecturer_help'] = 'Name of the instructor or lecturer';
+$string['dayofweek'] = 'Day of Week';
+$string['dayofweek_help'] = 'Day of the week when this class is scheduled';
+$string['scheduletime'] = 'Schedule Time';
+$string['scheduletime_help'] = 'Time when this class is scheduled (e.g., 08:00-10:00)';
+$string['room'] = 'Room';
+$string['room_help'] = 'Classroom or location where this class takes place';
+
+// Days of the week
+$string['selectday'] = 'Select day';
+$string['monday'] = 'Monday';
+$string['tuesday'] = 'Tuesday';
+$string['wednesday'] = 'Wednesday';
+$string['thursday'] = 'Thursday';
+$string['friday'] = 'Friday';
+$string['saturday'] = 'Saturday';
+$string['sunday'] = 'Sunday';
+
+// Meeting teacher
+$string['meetingteacher'] = 'Meeting Teacher';
+$string['meetingteacher_help'] = 'Select the teacher who will be conducting this meeting';
+$string['selectteacher'] = 'Select teacher';
+
+// Report strings
+$string['studentreport'] = 'Student Attendance Report';
+$string['teacherreport'] = 'Lecture Teaching Report';
+$string['printstudentreport'] = 'Student Report';
+$string['printteacherreport'] = 'Lecture Report';
+$string['no'] = 'No.';
+$string['nim'] = 'Student ID';
+$string['fullname'] = 'Full Name';
+$string['numberpresent'] = 'Number Present';
+$string['numberabsent'] = 'Number Absent';
+$string['print'] = 'Print';
+$string['lecturer_in_charge'] = 'Lecturer in Charge';
 
 // Events
 $string['eventcoursemoduleviewed'] = 'QR Attendance module viewed';

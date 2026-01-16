@@ -18,7 +18,7 @@
  * QR Code scanner interface for students
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -71,7 +71,7 @@ if (empty($activemeetings)) {
     echo html_writer::div(
         html_writer::tag('h4', get_string('manualentry', 'qratt')) .
         html_writer::tag('p', get_string('manualentryinfo', 'qratt')) .
-        html_writer::start_tag('form', array('method' => 'get', 'action' => $action_url)) .
+        html_writer::start_tag('form', array('method' => 'get', 'action' => $action_url, 'id' => 'manual-entry-form')) .
         html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'meeting', 'value' => '')) .
         html_writer::tag('div',
             html_writer::tag('label', get_string('qrcode', 'qratt') . ' URL:', array('for' => 'qr-url')) .
@@ -156,17 +156,20 @@ if (empty($activemeetings)) {
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
-function onScanSuccess(decodedText, decodedResult) {
+let qrScanner = null;
+let hasRedirected = false;
+
+async function onScanSuccess(decodedText, decodedResult) {
+    if (hasRedirected) { return; }
     console.log(`Code matched = ${decodedText}`, decodedResult);
     
     // Check if the scanned URL is valid and redirect
     if (decodedText.includes('/mod/qratt/scan.php')) {
+        hasRedirected = true;
         document.getElementById('scan-result').innerHTML = 
             '<span style="color: green;">✓ QR Code detected! Redirecting...</span>';
-        
-        setTimeout(() => {
-            window.location.href = decodedText;
-        }, 1000);
+        try { if (qrScanner) { await qrScanner.stop(); } } catch (e) {}
+        window.location.replace(decodedText);
     } else {
         document.getElementById('scan-result').innerHTML = 
             '<span style="color: red;">✗ Invalid QR code. Please scan the attendance QR code displayed by your lecturer.</span>';
@@ -179,9 +182,9 @@ function onScanFailure(error) {
 
 // Initialize QR scanner when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    const html5QrCode = new Html5Qrcode("qr-reader");
+    qrScanner = new Html5Qrcode("qr-reader");
     
-    html5QrCode.start(
+    qrScanner.start(
         { facingMode: "environment" }, // Use back camera
         {
             fps: 10,
@@ -194,35 +197,38 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('scan-result').innerHTML = 
             '<span style="color: orange;">⚠ Camera access required. Please allow camera permission and refresh the page.</span>';
     });
-});
 
-// Handle manual entry form submission
-document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const urlString = document.getElementById('qr-url').value;
-    
-    if (urlString) {
-        try {
-            const url = new URL(urlString);
-            const token = url.searchParams.get("token");
-            const meeting = url.searchParams.get("meeting");
-            const pathname = url.pathname;
+    // Handle manual entry form submission
+    const manualForm = document.getElementById('manual-entry-form');
+    if (manualForm) {
+        manualForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const urlString = document.getElementById('qr-url').value;
+            
+            if (urlString) {
+                try {
+                    const url = new URL(urlString);
+                    const token = url.searchParams.get("token");
+                    const meeting = url.searchParams.get("meeting");
+                    const pathname = url.pathname;
 
-            // Validate the parsed components of the URL
-            if (token && meeting && pathname.includes('/mod/qratt/scan.php')) {
-                // Reconstruct a clean URL to ensure it is valid
-                const redirectUrl = new URL(window.location.origin + pathname);
-                redirectUrl.searchParams.append('token', token);
-                redirectUrl.searchParams.append('meeting', meeting);
-                
-                window.location.href = redirectUrl.href;
-            } else {
-                alert('<?php echo get_string('invalidqrurl', 'qratt'); ?>');
+                    // Validate the parsed components of the URL
+                    if (token && meeting && pathname.includes('/mod/qratt/scan.php')) {
+                        // Reconstruct a clean URL to ensure it is valid
+                        const redirectUrl = new URL(window.location.origin + pathname);
+                        redirectUrl.searchParams.append('token', token);
+                        redirectUrl.searchParams.append('meeting', meeting);
+                        hasRedirected = true;
+                        window.location.replace(redirectUrl.href);
+                    } else {
+                        alert('<?php echo get_string('invalidqrurl', 'qratt'); ?>');
+                    }
+                } catch (error) {
+                    // This will catch any invalid URLs that cannot be parsed
+                    alert('<?php echo get_string('invalidqrurl', 'qratt'); ?>');
+                }
             }
-        } catch (error) {
-            // This will catch any invalid URLs that cannot be parsed
-            alert('<?php echo get_string('invalidqrurl', 'qratt'); ?>');
-        }
+        });
     }
 });
 </script>

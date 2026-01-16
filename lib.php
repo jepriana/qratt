@@ -18,7 +18,7 @@
  * Library of interface functions and constants for module QR Attendance
  *
  * @package    mod_qratt
- * @copyright  2024 QR Attendance Team
+ * @copyright  2025 QR Attendance Team (I Wayan Jepriana)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -71,7 +71,7 @@ function qratt_supports($feature) {
  * @param mod_qratt_mod_form $mform The form instance
  * @return int The id of the newly inserted qratt record
  */
-function qratt_add_instance(stdClass $qratt, mod_qratt_mod_form $mform = null) {
+function qratt_add_instance(stdClass $qratt, ?mod_qratt_mod_form $mform = null) {
     global $DB;
 
     $qratt->timecreated = time();
@@ -89,7 +89,7 @@ function qratt_add_instance(stdClass $qratt, mod_qratt_mod_form $mform = null) {
  * @param mod_qratt_mod_form $mform The form instance
  * @return boolean Success/Fail
  */
-function qratt_update_instance(stdClass $qratt, mod_qratt_mod_form $mform = null) {
+function qratt_update_instance(stdClass $qratt, ?mod_qratt_mod_form $mform = null) {
     global $DB;
 
     $qratt->timemodified = time();
@@ -121,6 +121,55 @@ function qratt_delete_instance($id) {
     $DB->delete_records('qratt', array('id' => $id));
 
     return true;
+}
+
+/**
+ * Filter users to ensure only students (not teachers) are included
+ *
+ * @param array $users Array of user objects
+ * @param context $context Context to check roles in
+ * @return array Filtered array containing only students
+ */
+function qratt_filter_students_only($users, $context) {
+    global $DB;
+    
+    $filteredstudents = array();
+    $studentrole = $DB->get_record('role', array('shortname' => 'student'));
+    
+    if (!$studentrole) {
+        return array(); // Return empty if student role not found
+    }
+    
+    // Get teacher role IDs to exclude
+    $teacherroles = $DB->get_records_menu('role', 
+        array(), '', 'id, shortname');
+    $teacheroleids = array();
+    foreach ($teacherroles as $roleid => $shortname) {
+        if (in_array($shortname, array('teacher', 'editingteacher', 'manager'))) {
+            $teacheroleids[] = $roleid;
+        }
+    }
+    
+    foreach ($users as $user) {
+        // Check if user has student role
+        $hasstudent = user_has_role_assignment($user->id, $studentrole->id, $context->id);
+        
+        // Check if user has teacher role
+        $hasteacher = false;
+        foreach ($teacheroleids as $teacheroleid) {
+            if (user_has_role_assignment($user->id, $teacheroleid, $context->id)) {
+                $hasteacher = true;
+                break;
+            }
+        }
+        
+        // Include only if has student role and no teacher role
+        if ($hasstudent && !$hasteacher) {
+            $filteredstudents[$user->id] = $user;
+        }
+    }
+    
+    return $filteredstudents;
 }
 
 /**
@@ -264,8 +313,7 @@ function qratt_print_recent_mod_activity($activity, $courseid, $detail, $modname
 function qratt_generate_qr_code($meetingid, $expiry) {
     global $CFG;
     
-    // Use a fallback salt if passwordsaltmain is not available
-    $salt = isset($CFG->passwordsaltmain) ? $CFG->passwordsaltmain : 'qratt_default_salt';
+    $salt = qratt_get_encryption_key();
     $token = md5($meetingid . $expiry . $salt);
     return $CFG->wwwroot . '/mod/qratt/scan.php?token=' . $token . '&meeting=' . $meetingid;
 }
@@ -311,4 +359,85 @@ function qratt_get_user_statistics($qrattid, $userid) {
         'absent' => $absent,
         'percentage' => $totalmeetings > 0 ? round(($present / $totalmeetings) * 100, 2) : 0
     );
+}
+
+/**
+ * Get the encryption key for QR code generation
+ *
+ * @return string The encryption key
+ */
+function qratt_get_encryption_key() {
+    global $CFG;
+    
+    // Get configured encryption key
+    $configkey = get_config('mod_qratt', 'encryptionkey');
+    
+    if (!empty($configkey)) {
+        return $configkey;
+    }
+    
+    // Fall back to system salt if no custom key is configured
+    return isset($CFG->passwordsaltmain) ? $CFG->passwordsaltmain : 'qratt_default_salt';
+}
+
+/**
+ * Get institution information for reports
+ *
+ * @return stdClass Institution information object
+ */
+function qratt_get_institution_info() {
+    $info = new stdClass();
+    $info->name = get_config('mod_qratt', 'institutionname') ?: '';
+    $info->address = get_config('mod_qratt', 'institutionaddress') ?: '';
+    $info->phone = get_config('mod_qratt', 'institutionphone') ?: '';
+    $info->fax = get_config('mod_qratt', 'institutionfax') ?: '';
+    $info->includeinreports = get_config('mod_qratt', 'includeinstitutioninfo') ? true : false;
+    $info->includelogo = get_config('mod_qratt', 'includelogoinreports') ? true : false;
+    
+    return $info;
+}
+
+/**
+ * Get institution logo URL for reports
+ *
+ * @return string|null Logo URL or null if no logo configured
+ */
+function qratt_get_institution_logo_url() {
+    global $CFG;
+    
+    $fs = get_file_storage();
+    $context = context_system::instance();
+    
+    $files = $fs->get_area_files($context->id, 'mod_qratt', 'institutionlogo', 0, 'timemodified DESC', false);
+    
+    if (!empty($files)) {
+        $file = reset($files);
+        return moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $file->get_component(),
+            $file->get_filearea(),
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out();
+    }
+    
+    return null;
+}
+
+/**
+ * Serves files from the QR Attendance file areas
+ *
+ * @param stdClass $course the course object
+ * @param stdClass $cm the course module object
+ * @param stdClass $context the qratt's context
+ * @param string $filearea the name of the file area
+ * @param array $args extra arguments (itemid, path)
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool false if the file not found, just send the file otherwise and do not return anything
+ */
+function qratt_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    require_once(__DIR__ . '/pluginfile.php');
+    return qratt_serve_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
 }

@@ -8,8 +8,11 @@ A Moodle activity module that allows lecturers to take student attendance using 
 - **QR Code Generation**: Dynamic QR codes that refresh every 60 seconds for security
 - **Automatic Attendance Tracking**: Students scan QR codes to automatically mark their attendance
 - **Multiple Attendance Statuses**: Support for Present, Absent, Late, and Excused statuses
+- **Professional Reports**: Comprehensive student and teacher reports with institution branding
+- **Institution Management**: Complete institution information with logo and contact details
+- **Course Information**: Enhanced course data including semester, department, lecturer details
+- **Print-Ready Reports**: Professional A4-formatted reports with auto-print functionality
 - **Real-time Updates**: QR codes automatically refresh to prevent unauthorized sharing
-- **Comprehensive Reports**: View attendance data by meeting or by student
 - **CSV Export**: Download attendance reports in CSV format
 - **Multi-language Support**: Available in English and Indonesian
 - **Manual Override**: Lecturers can manually change student attendance status
